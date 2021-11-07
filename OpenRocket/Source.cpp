@@ -13,10 +13,10 @@
 
 #include "loadShaders.h"
 
-#include "glm/glm.hpp"  
-#include "glm/ext/matrix_transform.hpp"
-#include "glm/gtx/transform.hpp"
-#include "glm/gtc/type_ptr.hpp"
+#include "glm/glm/glm.hpp"  
+#include "glm/glm/ext/matrix_transform.hpp"
+#include "glm/glm/gtx/transform.hpp"
+#include "glm/glm/gtc/type_ptr.hpp"
 
 using namespace std;
 
@@ -40,9 +40,6 @@ int codCol;
 float PI = 3.141592;
 
 int width = 800, height = 450;
-
-
-
 
 void displayMatrix()
 {
@@ -68,7 +65,7 @@ void CreateVBO(void)
 
 		// Triunghiul de jos
 		0.f, 100.f, 0.f, 1.f,
-		50.f, 100.f, 0.f, 1.f, 
+		50.f, 100.f, 0.f, 1.f,
 		25.f, 165.f, 0.f, 1.f,
 
 		// Desptunghiul
@@ -197,7 +194,7 @@ void Initialize(void)
 	myMatrix = resizeMatrix * matrTransl;
 	displayMatrix();
 
-	glClearColor(1.0f, 1.0f, 1.0f, 0.0f); // culoarea de fond a ecranului
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f); // culoarea de fond a ecranului
 	CreateVBO();
 	CreateShaders();
 }
@@ -231,7 +228,7 @@ int main(int argc, char* argv[])
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
 	glutInitWindowPosition(100, 100);
-	glutInitWindowSize(2*width, 2*height);
+	glutInitWindowSize(2 * width, 2 * height);
 	glutCreateWindow("Utilizarea glm pentru transformari");
 	glewInit();
 	Initialize();
@@ -241,4 +238,3 @@ int main(int argc, char* argv[])
 
 
 }
-

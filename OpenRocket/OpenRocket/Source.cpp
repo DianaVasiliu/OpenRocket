@@ -13,10 +13,10 @@
 
 #include "loadShaders.h"
 
-#include "glm/glm.hpp"  
-#include "glm/ext/matrix_transform.hpp"
-#include "glm/gtx/transform.hpp"
-#include "glm/gtc/type_ptr.hpp"
+#include "glm/glm/glm.hpp"  
+#include "glm/glm/ext/matrix_transform.hpp"
+#include "glm/glm/gtx/transform.hpp"
+#include "glm/glm/gtc/type_ptr.hpp"
 
 using namespace std;
 

@@ -10,6 +10,7 @@
 #include <iostream>
 #include <GL/glew.h> // glew apare inainte de freeglut
 #include <GL/freeglut.h> // nu trebuie uitat freeglut.h
+#include <random>
 
 #include "loadShaders.h"
 
@@ -40,6 +41,7 @@ int codCol;
 float PI = 3.141592;
 
 int width = 800, height = 450;
+int numberOfStars = 200;
 
 
 
@@ -60,7 +62,13 @@ void displayMatrix()
 void CreateVBO(void)
 {
 	// varfurile 
-	GLfloat Vertices[] = {
+	GLfloat Vertices[1000] = {
+		// Background-ul
+		0.f, 0.f, 0.f, 1.f, // stanga jos
+		float(2*width), 0.f, 0.f, 1.f, // dreapta jos
+		float(2 * width), float(2 * height), 0.f, 1.f, // dreapta sus
+		0.f, float(2 * height), 0.f, 1.f, // stnaga sus
+
 		// Triunghiul de sus
 		0.f, 160.f, 0.f, 1.f,
 		50.f, 160.f, 0.f, 1.f,
@@ -95,10 +103,15 @@ void CreateVBO(void)
 		40.f, 90.f, 0.f, 1.f,
 		25.f, 80.f, 0.f, 1.f,
 		10.f, 90.f, 0.f, 1.f,
-
 	};
 
-	GLfloat Colors[] = {
+	GLfloat Colors[1000] = {
+		// Background-ul
+		0.f, 0.f, 0.f, 0.f, 
+		0.f, 0.f, 0.f, 0.f,
+		0.f, 0.f, 0.f, 0.f,
+		0.f, 0.f, 0.f, 0.f,
+
 		// Triunghiul de sus
 		1.0f, 0.0f, 0.0f, 0.f,
 		1.0f, 0.0f, 0.0f, 0.f,
@@ -134,6 +147,22 @@ void CreateVBO(void)
 		1.0f, 0.8f, 0.0f, 1.0f,
 		1.0f, 0.8f, 0.0f, 1.0f
 	};
+
+	srand(time(NULL));
+	int i = 27;
+	while (i < 27 + numberOfStars) {
+		Vertices[4*i] = float(rand() % (2 * width) + 1);
+		Vertices[4*i + 1] = float(rand() % (2 * width) + 1);
+		Vertices[4 * i + 2] = 0.f;
+		Vertices[4 * i + 3] = 1.f;
+		cout << i << " " << Vertices[4 * i] << " " << Vertices[4 * i + 1] << " " << Vertices[4 * i + 2] << " " << Vertices[4 * i + 3] << "\n";
+		Colors[4 * i] = 1.f;
+		Colors[4 * i + 1] = 1.f;
+		Colors[4 * i + 2] = 1.f;
+		Colors[4 * i + 3] = 1.f;
+		cout << i << " " << Colors[4 * i] << " " << Colors[4 * i + 1] << " " << Colors[4 * i + 2] << " " << Colors[4 * i + 3] << "\n";
+		i++;
+	}
 
 
 	// se creeaza un buffer nou
@@ -208,13 +237,15 @@ void RenderFunction(void)
 	myMatrixLocation = glGetUniformLocation(ProgramId, "myMatrix");
 	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &myMatrix[0][0]);
 
-	glPointSize(10.0);
-	glDrawArrays(GL_TRIANGLES, 0, 3);
-	glDrawArrays(GL_TRIANGLES, 3, 3);
-	glDrawArrays(GL_POLYGON, 6, 4);
-	glDrawArrays(GL_TRIANGLES, 10, 3);
-	glDrawArrays(GL_POLYGON, 13, 5);
-	glDrawArrays(GL_POLYGON, 18, 5);
+	glPointSize(3.0);
+	glDrawArrays(GL_POLYGON, 0, 4);
+	glDrawArrays(GL_TRIANGLES, 4, 3);
+	glDrawArrays(GL_TRIANGLES, 7, 3);
+	glDrawArrays(GL_POLYGON, 10, 4);
+	glDrawArrays(GL_TRIANGLES, 14, 3);
+	glDrawArrays(GL_POLYGON, 17, 5);
+	glDrawArrays(GL_POLYGON, 22, 5);
+	glDrawArrays(GL_POINTS, 27, numberOfStars);
 
 	glutPostRedisplay();
 	glFlush();

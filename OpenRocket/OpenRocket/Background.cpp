@@ -1,104 +1,113 @@
-int numberOfStars = 200;
+#include "Background.h"
+#include "Game.h"
+#include "loadShaders.h"
+#include "helpers.h"
 
-// varfurile 
-GLfloat Vertices[1000] = {
-	// Background-ul
-	0.f, 0.f, 0.f, 1.f, // stanga jos
-	float(2 * width), 0.f, 0.f, 1.f, // dreapta jos
-	float(2 * width), float(2 * height), 0.f, 1.f, // dreapta sus
-	0.f, float(2 * height), 0.f, 1.f, // stnaga sus
+#include <GL/glew.h>
+#include <GL/freeglut.h>
 
-	// Triunghiul de sus
-	0.f, 160.f, 0.f, 1.f,
-	50.f, 160.f, 0.f, 1.f,
-	25.f, 185.f, 0.f, 1.f,
+Background* Background::instance = nullptr;
 
-	// Triunghiul de jos
-	0.f, 100.f, 0.f, 1.f,
-	50.f, 100.f, 0.f, 1.f,
-	25.f, 165.f, 0.f, 1.f,
+Background* Background::getInstance() {
+	if (instance == nullptr) {
+		instance = new Background();
+	}
+	return instance;
+}
 
-	// Desptunghiul
-	15.f, 100.f, 0.f, 1.f,  // stanga jos
-	35.f, 100.f, 0.f, 1.f, // dr jos
-	35.f, 175.f, 0.f, 1.f,
-	15.f, 175.f, 0.f, 1.f,
+Background::Background() {
+}
 
-	// Triunghiul din varf
-	15.f, 175.f, 0.f, 1.f,
-	35.f, 175.f, 0.f, 1.f,
-	25.f, 210.f, 0.f, 1.f,
+void Background::CreateShaders(const char* vertShader, const char* fragShader) {
+	ProgramId = LoadShaders(vertShader, fragShader);
+	glUseProgram(ProgramId);
+}
 
-	// Focul portocaliu
-	15.f, 100.f, 0.f, 1.f,
-	35.f, 100.f, 0.f, 1.f,
-	50.f, 85.f, 0.f, 1.f,
-	25.f, 50.f, 0.f, 1.f,
-	0.f, 85.f, 0.f, 1.f,
+void Background::DestroyShaders(void) {
+	glDeleteProgram(ProgramId);
+}
 
-	// Focul galben
-	15.f, 100.f, 0.f, 1.f,
-	35.f, 100.f, 0.f, 1.f,
-	40.f, 90.f, 0.f, 1.f,
-	25.f, 80.f, 0.f, 1.f,
-	10.f, 90.f, 0.f, 1.f,
-};
+void Background::Cleanup(void) {
+	DestroyShaders();
+	DestroyVBO();
+}
 
-GLfloat Colors[1000] = {
-	// Background-ul
-	0.f, 0.f, 0.f, 0.f,
-	0.f, 0.f, 0.f, 0.f,
-	0.f, 0.f, 0.f, 0.f,
-	0.f, 0.f, 0.f, 0.f,
+void Background::DestroyVBO(void) {
+	glDisableVertexAttribArray(1);
+	glDisableVertexAttribArray(0);
 
-	// Triunghiul de sus
-	1.0f, 0.0f, 0.0f, 0.f,
-	1.0f, 0.0f, 0.0f, 0.f,
-	1.0f, 0.0f, 0.0f, 0.f,
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glDeleteBuffers(1, &ColorBufferId);
+	glDeleteBuffers(1, &VboId);
 
-	// Triunghiul de jos
-	1.0f, 0.0f, 0.0f, 0.f,
-	1.0f, 0.0f, 0.0f, 0.f,
-	1.0f, 0.0f, 0.0f, 0.f,
+	glBindVertexArray(0);
+	glDeleteVertexArrays(1, &VaoId);
+}
 
-	// Dreptunghiul
-	0.8f, 0.5f, 0.2f, 0.f,
-	0.8f, 0.5f, 0.2f, 0.f,
-	0.8f, 0.5f, 0.2f, 0.f,
-	0.8f, 0.5f, 0.2f, 0.f,
+void Background::InitializeGame(const char* vertShader, const char* fragShader) {
+	Game* game = Game::getInstance();
+	resizeMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(1.f / game->getMaxX(), 1.f / game->getMaxY(), 1.0));
+	matrTransl = glm::translate(glm::mat4(1.0f), glm::vec3(-game->getMaxX(), -game->getMaxY(), 0.0));
 
-	// Triunghiul din varf
-	1.0f, 1.0f, 0.0f, 0.f,
-	1.0f, 1.0f, 0.0f, 0.f,
-	1.0f, 1.0f, 0.0f, 0.f,
+	myMatrix = resizeMatrix * matrTransl;
 
-	// Focul portocaliu
-	1.f, 0.25f, 0.0f, 1.0f,
-	1.f, 0.25f, 0.0f, 1.0f,
-	1.f, 0.25f, 0.0f, 1.0f,
-	1.f, 0.25f, 0.0f, 1.0f,
-	1.f, 0.25f, 0.0f, 1.0f,
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	CreateVBO();
+	CreateShaders(vertShader, fragShader);
+}
 
-	// Focul galben
-	1.0f, 0.8f, 0.0f, 1.0f,
-	1.0f, 0.8f, 0.0f, 1.0f,
-	1.0f, 0.8f, 0.0f, 1.0f,
-	1.0f, 0.8f, 0.0f, 1.0f,
-	1.0f, 0.8f, 0.0f, 1.0f
-};
+void Background::CreateVBO() {
+	Background* background = Background::getInstance();
+	Game* game = Game::getInstance();
+	// varfurile 
+	GLfloat Vertices[1000];
+	GLfloat Colors[1000];
 
-srand(time(NULL));
-int i = 27;
-while (i < 27 + numberOfStars) {
-	Vertices[4 * i] = float(rand() % (2 * width) + 1);
-	Vertices[4 * i + 1] = float(rand() % (2 * width) + 1);
-	Vertices[4 * i + 2] = 0.f;
-	Vertices[4 * i + 3] = 1.f;
-	cout << i << " " << Vertices[4 * i] << " " << Vertices[4 * i + 1] << " " << Vertices[4 * i + 2] << " " << Vertices[4 * i + 3] << "\n";
-	Colors[4 * i] = 1.f;
-	Colors[4 * i + 1] = 1.f;
-	Colors[4 * i + 2] = 1.f;
-	Colors[4 * i + 3] = 1.f;
-	cout << i << " " << Colors[4 * i] << " " << Colors[4 * i + 1] << " " << Colors[4 * i + 2] << " " << Colors[4 * i + 3] << "\n";
-	i++;
+	srand(time(NULL));
+	int i = 0;
+	while (i < nrOfStars) {
+		Vertices[4 * i] = float(rand() % (2 * game->getWidth()) + 1);
+		Vertices[4 * i + 1] = float(rand() % (2 * game->getHeight()) + 1);
+		Vertices[4 * i + 2] = 0.f;
+		Vertices[4 * i + 3] = 1.f;
+		cout << i << " " << Vertices[4 * i] << " " << Vertices[4 * i + 1] << " " << Vertices[4 * i + 2] << " " << Vertices[4 * i + 3] << "\n";
+		Colors[4 * i] = 1.f;
+		Colors[4 * i + 1] = 1.f;
+		Colors[4 * i + 2] = 1.f;
+		Colors[4 * i + 3] = 1.f;
+		cout << i << " " << Colors[4 * i] << " " << Colors[4 * i + 1] << " " << Colors[4 * i + 2] << " " << Colors[4 * i + 3] << "\n";
+		i++;
+	}
+
+	// se creeaza un buffer nou
+	glGenBuffers(2, &VboId);
+	// este setat ca buffer curent
+	glBindBuffer(GL_ARRAY_BUFFER, VboId);
+	// punctele sunt "copiate" in bufferul curent
+	glBufferData(GL_ARRAY_BUFFER, sizeof(Vertices), Vertices, GL_STATIC_DRAW);
+
+	glEnableVertexAttribArray(0);
+	// 
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
+
+	// un nou buffer, pentru culoare
+	glGenBuffers(1, &ColorBufferId);
+	glBindBuffer(GL_ARRAY_BUFFER, ColorBufferId);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(Colors), Colors, GL_STATIC_DRAW);
+	// atributul 1 =  culoare
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
+}
+
+void Background::RenderFunction(void) {
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	myMatrixLocation = glGetUniformLocation(ProgramId, "myMatrix");
+	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &myMatrix[0][0]);
+
+	glPointSize(3.0);
+	glDrawArrays(GL_POINTS, 0, 200);
+
+	glutPostRedisplay();
+	glFlush();
 }

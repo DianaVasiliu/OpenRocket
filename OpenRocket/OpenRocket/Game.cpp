@@ -1,4 +1,5 @@
 #include "Game.h"
+#include "Background.h"
 #include "loadShaders.h"
 #include "helpers.h"
 
@@ -14,7 +15,7 @@ Game* Game::getInstance(){
 	return instance;
 }
 
-Game::Game(int window_width, int window_height, int initial_pos_x, int initial_pos_y) {
+Game::Game(int window_width, int window_height, int initial_pos_x, int initial_pos_y) : VAO() {
 	setWidth(window_width);
 	setHeight(window_height);
 	setInitPosX(initial_pos_x);
@@ -65,7 +66,9 @@ void Game::InitializeGame(const char* vertShader, const char* fragShader) {
 	myMatrix = resizeMatrix * matrTransl;
 
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-	CreateVBO();
+	//CreateVBO();
+	Background* background = Background::getInstance();
+	background->CreateVBO();
 	CreateShaders(vertShader, fragShader);
 }
 

@@ -1,16 +1,10 @@
 #pragma once
 
-#include <GL/glew.h>
-#include <GL/freeglut.h>
-
-#include "glm/glm/glm.hpp"  
-#include "glm/glm/ext/matrix_transform.hpp"
-#include "glm/glm/gtx/transform.hpp"
-#include "glm/glm/gtc/type_ptr.hpp"
+#include "VAO.h"
 
 using namespace std;
 
-class Game {
+class Game : public VAO {
 private:
 	static Game* instance;
 	const char* title = "Open Rocket";
@@ -23,7 +17,6 @@ private:
 	int maxX;
 	int maxY;
 	GLuint ProgramId;
-	GLuint VaoId;
 	GLuint VboId;
 	GLuint ColorBufferId;
 	GLuint myMatrixLocation;
@@ -54,7 +47,8 @@ public:
 	int getWidth() { return width; }
 	int getInitPosX() { return init_pos_x; }
 	int getInitPosY() { return init_pos_y; }
-	GLuint getVaoId() { return VaoId; }
+	int getMaxX() { return maxX; }
+	int getMaxY() { return maxY; }
 	GLuint getVboId() { return VboId; }
 	GLuint getColorBufferId() { return ColorBufferId; }
 

@@ -119,11 +119,6 @@ void Game::RenderFunction(void) {
 
 	glm::mat4 matrix = scaleMatrix * translateMatrix * rocketTranslateMatrix;
 
-	//rocket->multRocketScaleMatrix(scaleMatrix);
-	//rocket->multRocketTranslateMatrix(translateMatrix);
-
-	//rocketMatrix = rocket->getRocketMatrix();
-
 	myMatrixLocation = glGetUniformLocation(ProgramId, "myMatrix");
 	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &matrix[0][0]);
 

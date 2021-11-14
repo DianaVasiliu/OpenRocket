@@ -31,25 +31,6 @@ public:
 	float getPositionX() { return positionX; }
 	float getPositionY() { return positionY; }
 
-	void multRocketScaleMatrix(glm::mat4 matrix) { 
-        rocketScaleMatrix = matrix * rocketScaleMatrix; 
-		updateRocketMatrix();
-    }
-	
-    void multRocketRotateMatrix(glm::mat4 matrix) { 
-        rocketRotateMatrix = matrix * rocketRotateMatrix; 
-		updateRocketMatrix();
-    }
-	
-    void multRocketTranslateMatrix(glm::mat4 matrix) { 
-        rocketTranslateMatrix = rocketTranslateMatrix; 
-		updateRocketMatrix();
-    }
-
-    void updateRocketMatrix() { 
-        rocketMatrix = rocketScaleMatrix * rocketTranslateMatrix;
-    }
-
 	void Update();
 	void MoveRocket(int key, int x, int y);
 };

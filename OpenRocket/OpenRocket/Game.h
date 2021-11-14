@@ -1,24 +1,45 @@
 #pragma once
 
-#include "VAO.h"
+#include <GL/glew.h>
+#include <GL/freeglut.h>
+
+#include "glm/glm/glm.hpp"  
+#include "glm/glm/ext/matrix_transform.hpp"
+#include "glm/glm/gtx/transform.hpp"
+#include "glm/glm/gtc/type_ptr.hpp"
+#include "Constants.h"
 
 using namespace std;
 
-class Game : public VAO {
+class Game {
 private:
 	static Game* instance;
-	const char* title = "Open Rocket";
-	const float PI = 3.141592;
-	int colorCode;
-	int height;
+
+	GLuint backgroundVao;
+	GLuint backgroundVbo;
+	GLuint backgroundEbo;
+	GLuint backgroundColorBufferId;
+
+	GLuint rocketVao;
+	GLuint rocketVbo;
+	GLuint rocketColorBufferId;
+
+	GLuint asteroidVao;
+	GLuint asteroidVbo;
+
 	int width;
+	int height;
+
+	GLuint ProgramId;
+
+	int nrOfStars;
+
+	int colorCode;
 	int init_pos_x;
 	int init_pos_y;
 	int maxX;
 	int maxY;
-	GLuint ProgramId;
-	GLuint VboId;
-	GLuint ColorBufferId;
+
 	GLuint myMatrixLocation;
 	GLuint matrScaleLocation;
 	GLuint matrTranslLocation;
@@ -42,22 +63,18 @@ public:
 	void setInitPosX(int x) { init_pos_x = x; }
 	void setInitPosY(int y) { init_pos_y = y; }
 
-	const char* getTitle() { return title; }
 	int getHeight() { return height; }
 	int getWidth() { return width; }
 	int getInitPosX() { return init_pos_x; }
 	int getInitPosY() { return init_pos_y; }
-	int getMaxX() { return maxX; }
-	int getMaxY() { return maxY; }
-	GLuint getVboId() { return VboId; }
-	GLuint getColorBufferId() { return ColorBufferId; }
 
+	void CreateBackgroundBuffers();
+	void CreateRocketBuffers();
 	void InitializeGlew();
 	void CreateShaders(const char* vertShader, const char* fragShader);
 	void DestroyShaders(void);
 	void Cleanup(void);
-	void CreateVBO();
-	void DestroyVBO(void);
+	void DestroyBackgroundVBO(void);
 
 	void InitializeGame(const char* vertShader, const char* fragShader);
 	void RenderFunction(void);

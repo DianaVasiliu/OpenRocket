@@ -1,5 +1,4 @@
 #include "Game.h"
-#include "Background.h"
 #include "loadShaders.h"
 #include "helpers.h"
 
@@ -8,26 +7,32 @@
 
 Game* Game::instance = nullptr;
 
-Game* Game::getInstance(){
+Game* Game::getInstance() {
 	if (instance == nullptr) {
-		instance = new Game(1600, 900, 60, 60);
+		instance = new Game(Constants::width * 2, Constants::height * 2, 60, 60);
 	}
 	return instance;
 }
 
-Game::Game(int window_width, int window_height, int initial_pos_x, int initial_pos_y) : VAO() {
-	setWidth(window_width);
-	setHeight(window_height);
+Game::Game(int window_width, int window_height, int initial_pos_x, int initial_pos_y) :
+	nrOfStars(Constants::nrOfStars),
+	width(window_width),
+	height(window_height)
+{
 	setInitPosX(initial_pos_x);
 	setInitPosY(initial_pos_y);
 	maxX = width / 2;
 	maxY = height / 2;
+
+	InitializeGlew();
+	CreateBackgroundBuffers();
+	CreateRocketBuffers();
 }
 
 void Game::InitializeGlew() {
 	glutInitWindowPosition(getInitPosX(), getInitPosY());
 	glutInitWindowSize(getWidth(), getHeight());
-	glutCreateWindow(getTitle());
+	glutCreateWindow(Constants::title);
 	glewInit();
 	glutDisplayFunc(renderCallback);
 	glutCloseFunc(cleanupCallback);
@@ -44,37 +49,57 @@ void Game::DestroyShaders(void) {
 
 void Game::Cleanup(void) {
 	DestroyShaders();
-	DestroyVBO();
+	DestroyBackgroundVBO();
 }
 
-void Game::DestroyVBO(void) {
+void Game::DestroyBackgroundVBO(void) {
 	glDisableVertexAttribArray(1);
 	glDisableVertexAttribArray(0);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glDeleteBuffers(1, &ColorBufferId);
-	glDeleteBuffers(1, &VboId);
+	glDeleteBuffers(1, &backgroundColorBufferId);
+	glDeleteBuffers(1, &backgroundVbo);
 
 	glBindVertexArray(0);
-	glDeleteVertexArrays(1, &VaoId);
+	//glDeleteVertexArrays(1, &VaoId);
 }
 
 void Game::InitializeGame(const char* vertShader, const char* fragShader) {
+	CreateShaders("04_03_Shader.vert", "04_03_Shader.frag");
+
 	resizeMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(1.f / maxX, 1.f / maxY, 1.0));
 	matrTransl = glm::translate(glm::mat4(1.0f), glm::vec3(-maxX, -maxY, 0.0));
 
 	myMatrix = resizeMatrix * matrTransl;
 
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-	//CreateVBO();
-	Background* background = Background::getInstance();
-	background->CreateVBO();
-	CreateShaders(vertShader, fragShader);
 }
 
-void Game::CreateVBO() {
+void Game::RenderFunction(void) {
+	glm::mat4 backgroundMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(1.f / maxX, 1.f / maxY, 1.0));
+	backgroundMatrix = backgroundMatrix * glm::translate(glm::mat4(1.0f), glm::vec3(-maxX, -maxY, 0.0));
 
-	// varfurile 
+	myMatrixLocation = glGetUniformLocation(ProgramId, "myMatrix");
+	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &backgroundMatrix[0][0]);
+
+	glPointSize(2.0);
+	glBindVertexArray(backgroundVao);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, backgroundEbo);
+	glDrawArrays(GL_POINTS, 0, nrOfStars);
+
+	glBindVertexArray(rocketVao);
+	glDrawArrays(GL_TRIANGLES, 0, 3);
+	glDrawArrays(GL_TRIANGLES, 3, 3);
+	glDrawArrays(GL_POLYGON, 6, 4);
+	glDrawArrays(GL_TRIANGLES, 10, 3);
+	glDrawArrays(GL_POLYGON, 13, 5);
+	glDrawArrays(GL_POLYGON, 18, 5);
+
+	glutPostRedisplay();
+	glFlush();
+}
+
+void Game::CreateRocketBuffers() {
 	GLfloat Vertices[] = {
 		// Triunghiul de sus
 		0.f, 160.f, 0.f, 1.f,
@@ -150,44 +175,61 @@ void Game::CreateVBO() {
 		1.0f, 0.8f, 0.0f, 1.0f
 	};
 
-	// se creeaza un buffer nou
-	glGenBuffers(1, &VboId);
-	// este setat ca buffer curent
-	glBindBuffer(GL_ARRAY_BUFFER, VboId);
-	// punctele sunt "copiate" in bufferul curent
+	int verticesCount = sizeof(Vertices) / sizeof(GLfloat);
+
+	glGenBuffers(1, &rocketVao);
+	glBindBuffer(GL_ARRAY_BUFFER, rocketVbo);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(Vertices), Vertices, GL_STATIC_DRAW);
 
-	// se creeaza / se leaga un VAO (Vertex Array Object) - util cand se utilizeaza mai multe VBO
-	glGenVertexArrays(1, &VaoId);
-	glBindVertexArray(VaoId);
-	// se activeaza lucrul cu atribute; atributul 0 = pozitie
-	glEnableVertexAttribArray(0);
-	// 
-	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
+	glGenVertexArrays(1, &rocketVao);
+	glBindVertexArray(rocketVao);
 
-	// un nou buffer, pentru culoare
-	glGenBuffers(1, &ColorBufferId);
-	glBindBuffer(GL_ARRAY_BUFFER, ColorBufferId);
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(0);
+
+	glGenBuffers(1, &rocketColorBufferId);
+	glBindBuffer(GL_ARRAY_BUFFER, rocketColorBufferId);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(Colors), Colors, GL_STATIC_DRAW);
-	// atributul 1 =  culoare
-	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(1);
 }
 
-void Game::RenderFunction(void) {
-	glClear(GL_COLOR_BUFFER_BIT);
+void Game::CreateBackgroundBuffers() {
 
-	myMatrixLocation = glGetUniformLocation(ProgramId, "myMatrix");
-	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &myMatrix[0][0]);
+	GLfloat Vertices[1000];
+	GLfloat Colors[1000];
 
-	glPointSize(10.0);
-	glDrawArrays(GL_TRIANGLES, 0, 3);
-	glDrawArrays(GL_TRIANGLES, 3, 3);
-	glDrawArrays(GL_POLYGON, 6, 4);
-	glDrawArrays(GL_TRIANGLES, 10, 3);
-	glDrawArrays(GL_POLYGON, 13, 5);
-	glDrawArrays(GL_POLYGON, 18, 5);
+	srand(time(NULL));
+	int i = 0;
+	while (i < nrOfStars) {
+		Vertices[4 * i] = float(rand() % getWidth() + 1);
+		Vertices[4 * i + 1] = float(rand() % getHeight() + 1);
+		Vertices[4 * i + 2] = 0.f;
+		Vertices[4 * i + 3] = 1.f;
+		//cout << i << " " << Vertices[4 * i] << " " << Vertices[4 * i + 1] << " " << Vertices[4 * i + 2] << " " << Vertices[4 * i + 3] << "\n";
+		Colors[4 * i] = 1.f;
+		Colors[4 * i + 1] = 1.f;
+		Colors[4 * i + 2] = 1.f;
+		Colors[4 * i + 3] = 1.f;
+		//cout << i << " " << Colors[4 * i] << " " << Colors[4 * i + 1] << " " << Colors[4 * i + 2] << " " << Colors[4 * i + 3] << "\n";
+		i++;
+	}
 
-	glutPostRedisplay();
-	glFlush();
+	int verticesCount = sizeof(Vertices) / sizeof(GLfloat);
+
+	glGenBuffers(1, &backgroundVbo);
+	glBindBuffer(GL_ARRAY_BUFFER, backgroundVbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(Vertices), Vertices, GL_STATIC_DRAW);
+
+	glGenVertexArrays(1, &backgroundVao);
+	glBindVertexArray(backgroundVao);
+
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(0);
+
+	glGenBuffers(1, &backgroundColorBufferId);
+	glBindBuffer(GL_ARRAY_BUFFER, backgroundColorBufferId);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(Colors), Colors, GL_STATIC_DRAW);
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(1);
 }

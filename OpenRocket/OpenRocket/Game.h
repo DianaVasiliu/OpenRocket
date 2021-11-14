@@ -2,6 +2,7 @@
 
 #include <GL/glew.h>
 #include <GL/freeglut.h>
+#include "Rocket.h"
 
 #include "glm/glm/glm.hpp"  
 #include "glm/glm/ext/matrix_transform.hpp"
@@ -19,10 +20,18 @@ private:
 	GLuint backgroundVbo;
 	GLuint backgroundEbo;
 	GLuint backgroundColorBufferId;
+	glm::mat4 backgroundMatrix = glm::mat4(1.0f);
+	glm::mat4 backgroundScaleMatrix = glm::mat4(1.0f);
+	glm::mat4 backgroundRotateMatrix = glm::mat4(1.0f);
+	glm::mat4 backgroundTranslateMatrix = glm::mat4(1.0f);
 
 	GLuint rocketVao;
 	GLuint rocketVbo;
 	GLuint rocketColorBufferId;
+	glm::mat4 rocketMatrix = glm::mat4(1.0f);
+	glm::mat4 rocketScaleMatrix = glm::mat4(1.0f);
+	glm::mat4 rocketRotateMatrix = glm::mat4(1.0f);
+	glm::mat4 rocketTranslateMatrix = glm::mat4(1.0f);
 
 	GLuint asteroidVao;
 	GLuint asteroidVbo;
@@ -70,6 +79,8 @@ public:
 
 	void CreateBackgroundBuffers();
 	void CreateRocketBuffers();
+	void moveRocket(int key, int x, int y);
+
 	void InitializeGlew();
 	void CreateShaders(const char* vertShader, const char* fragShader);
 	void DestroyShaders(void);

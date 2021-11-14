@@ -47,7 +47,7 @@ public:
 	float getPositionY() { return positionY; }
 
 	void Update();
-	void MoveRocket(int key, int x, int y);
+	void MarkKeyUp(int key, int x, int y);
 	void MarkKeyDown(int key, int x, int y);
 	void MoveRight();
 	void MoveLeft();

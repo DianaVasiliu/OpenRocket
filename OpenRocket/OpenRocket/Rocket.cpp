@@ -16,7 +16,7 @@ Rocket* Rocket::getInstance() {
 	return instance;
 }
 
-void Rocket::MoveRocket(int key, int x, int y) {
+void Rocket::MarkKeyUp(int key, int x, int y) {
 	if (key == GLUT_KEY_RIGHT && rightIsPressed) {
 		rightIsPressed = false;
 	} 
@@ -55,16 +55,16 @@ void Rocket::MoveDown() {
 
 
 void Rocket::MarkKeyDown(int key, int x, int y) {
-	if (key == GLUT_KEY_RIGHT) {
-		rightIsPressed = true;
-		MoveRight();
+	if (key == GLUT_KEY_RIGHT) { // tocmai s-a apasat tasta RIGHT
+		rightIsPressed = true;	 // marchez aceasta tasta ca pressed
+		MoveRight();			 // mut racheta catre dreapta
 		if (upIsPressed) 
 		{
-			MoveUp();
+			MoveUp();			 // daca tasta Up era deja apasata, mut racheta si in sus
 		}
 		else if (downIsPressed) 
 		{
-			MoveUp();
+			MoveUp();			 // daca tasta Down era deja apasata, mut racheta si in jos
 		}
 	}
 	if (key == GLUT_KEY_LEFT) {

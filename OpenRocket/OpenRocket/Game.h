@@ -22,6 +22,7 @@ private:
 
 	GLuint rocketVao;
 	GLuint rocketVbo;
+	GLuint rocketColorBufferId;
 
 	GLuint asteroidVao;
 	GLuint asteroidVbo;
@@ -68,11 +69,11 @@ public:
 	int getInitPosY() { return init_pos_y; }
 
 	void CreateBackgroundBuffers();
+	void CreateRocketBuffers();
 	void InitializeGlew();
 	void CreateShaders(const char* vertShader, const char* fragShader);
 	void DestroyShaders(void);
 	void Cleanup(void);
-	void CreateVBO();
 	void DestroyBackgroundVBO(void);
 
 	void InitializeGame(const char* vertShader, const char* fragShader);

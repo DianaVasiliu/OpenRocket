@@ -10,8 +10,8 @@ int main(int argc, char* argv[]) {
 	glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
 
 	Game* game = Game::getInstance();
-	game->InitializeGlew();
 	game->InitializeGame("04_03_Shader.vert", "04_03_Shader.frag");
+	game->RenderFunction();
 
 	glutMainLoop();
 }

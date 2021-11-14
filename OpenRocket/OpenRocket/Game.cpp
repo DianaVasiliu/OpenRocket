@@ -100,9 +100,16 @@ void Game::RenderFunction(void) {
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 
+	if (rotationAngle > 360.f) {
+		rotationAngle = 0.0f;
+	}
+
+	rotationAngle += rotationSpeed;
+
 	backgroundScaleMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(1.f / maxX, 1.f / maxY, 1.0));
 	backgroundTranslateMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(-maxX, -maxY, 0.0));
-	backgroundMatrix = backgroundScaleMatrix * backgroundRotateMatrix * backgroundTranslateMatrix;
+	backgroundRotateMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(rotationAngle), glm::vec3(0.0f, 0.0f, -1.0f));
+	backgroundMatrix = backgroundScaleMatrix * backgroundTranslateMatrix * backgroundRotateMatrix;
 
 	myMatrixLocation = glGetUniformLocation(ProgramId, "myMatrix");
 	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &backgroundMatrix[0][0]);
@@ -139,14 +146,14 @@ void Game::RenderFunction(void) {
 
 void Game::CreateBackgroundBuffers() {
 
-	GLfloat Vertices[1000];
-	GLfloat Colors[1000];
+	GLfloat Vertices[10000];
+	GLfloat Colors[10000];
 
 	srand(time(NULL));
 	int i = 0;
 	while (i < nrOfStars) {
-		Vertices[4 * i] = float(rand() % getWidth() + 1);
-		Vertices[4 * i + 1] = float(rand() % getHeight() + 1);
+		Vertices[4 * i] = float(rand() % (4 * getWidth()) + 1) - 2 * getWidth();
+		Vertices[4 * i + 1] = float(rand() % (4 * getHeight()) + 1) - 2 * getHeight();
 		Vertices[4 * i + 2] = 0.f;
 		Vertices[4 * i + 3] = 1.f;
 		//cout << i << " " << Vertices[4 * i] << " " << Vertices[4 * i + 1] << " " << Vertices[4 * i + 2] << " " << Vertices[4 * i + 3] << "\n";
@@ -180,39 +187,39 @@ void Game::CreateBackgroundBuffers() {
 void Game::CreateRocketBuffers() {
 	GLfloat Vertices[] = {
 		// Triunghiul de sus
-		0.f, 160.f, 0.f, 1.f,
-		50.f, 160.f, 0.f, 1.f,
-		25.f, 185.f, 0.f, 1.f,
+		775.f, 160.f, 0.f, 1.f,
+		825.f, 160.f, 0.f, 1.f,
+		800.f, 185.f, 0.f, 1.f,
 
 		// Triunghiul de jos
-		0.f, 100.f, 0.f, 1.f,
-		50.f, 100.f, 0.f, 1.f,
-		25.f, 165.f, 0.f, 1.f,
+		775.f, 100.f, 0.f, 1.f,
+		825.f, 100.f, 0.f, 1.f,
+		800.f, 165.f, 0.f, 1.f,
 
 		// Deptunghiul
-		15.f, 100.f, 0.f, 1.f,  // stanga jos
-		35.f, 100.f, 0.f, 1.f, // dr jos
-		35.f, 175.f, 0.f, 1.f,
-		15.f, 175.f, 0.f, 1.f,
+		790.f, 100.f, 0.f, 1.f,  // stanga jos
+		810.f, 100.f, 0.f, 1.f, // dr jos
+		810.f, 175.f, 0.f, 1.f,
+		790.f, 175.f, 0.f, 1.f,
 
 		// Triunghiul din varf
-		15.f, 175.f, 0.f, 1.f,
-		35.f, 175.f, 0.f, 1.f,
-		25.f, 210.f, 0.f, 1.f,
+		790.f, 175.f, 0.f, 1.f,
+		810.f, 175.f, 0.f, 1.f,
+		800.f, 210.f, 0.f, 1.f,
 
 		// Focul portocaliu
-		15.f, 100.f, 0.f, 1.f,
-		35.f, 100.f, 0.f, 1.f,
-		50.f, 85.f, 0.f, 1.f,
-		25.f, 50.f, 0.f, 1.f,
-		0.f, 85.f, 0.f, 1.f,
+		790.f, 100.f, 0.f, 1.f,
+		810.f, 100.f, 0.f, 1.f,
+		825.f, 85.f, 0.f, 1.f,
+		800.f, 50.f, 0.f, 1.f,
+		775.f, 85.f, 0.f, 1.f,
 
 		// Focul galben
-		15.f, 100.f, 0.f, 1.f,
-		35.f, 100.f, 0.f, 1.f,
-		40.f, 90.f, 0.f, 1.f,
-		25.f, 80.f, 0.f, 1.f,
-		10.f, 90.f, 0.f, 1.f,
+		790.f, 100.f, 0.f, 1.f,
+		810.f, 100.f, 0.f, 1.f,
+		815.f, 90.f, 0.f, 1.f,
+		800.f, 80.f, 0.f, 1.f,
+		785.f, 90.f, 0.f, 1.f,
 
 	};
 

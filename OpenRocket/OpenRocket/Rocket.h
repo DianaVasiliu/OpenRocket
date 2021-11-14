@@ -19,7 +19,7 @@ private:
 
 	float positionX = 0;
 	float positionY = 0;
-	float boundsOffsetX = 25;
+	float boundsOffsetX = 800;
 	float boundsOffsetY = 135;
 
 public:

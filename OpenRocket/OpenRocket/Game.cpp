@@ -14,26 +14,29 @@ Game* Game::getInstance(){
 	return instance;
 }
 
-Game::Game(int window_width, int window_height, int initial_pos_x, int initial_pos_y) {
+Game::Game(int window_width, int window_height, int initial_pos_x, int initial_pos_y) : nrOfStars(Constants::nrOfStars) {
 	setWidth(window_width);
 	setHeight(window_height);
 	setInitPosX(initial_pos_x);
 	setInitPosY(initial_pos_y);
 	maxX = width / 2;
 	maxY = height / 2;
+
+	ProgramId = LoadShaders("04_03_Shader.vert", "04_03_Shader.frag");
+
 }
 
 void Game::InitializeGlew() {
 	glutInitWindowPosition(getInitPosX(), getInitPosY());
 	glutInitWindowSize(getWidth(), getHeight());
-	glutCreateWindow(getTitle());
+	glutCreateWindow(Constants::title);
 	glewInit();
 	glutDisplayFunc(renderCallback);
-	glutCloseFunc(cleanupCallback);
+	glutCloseFunc(cleanupCallback); 
 }
 
 void Game::CreateShaders(const char* vertShader, const char* fragShader) {
-	ProgramId = LoadShaders(vertShader, fragShader);
+	//ProgramId = LoadShaders(vertShader, fragShader);
 	glUseProgram(ProgramId);
 }
 
@@ -43,19 +46,19 @@ void Game::DestroyShaders(void) {
 
 void Game::Cleanup(void) {
 	DestroyShaders();
-	DestroyVBO();
+	DestroyBackgroundVBO();
 }
 
-void Game::DestroyVBO(void) {
+void Game::DestroyBackgroundVBO(void) {
 	glDisableVertexAttribArray(1);
 	glDisableVertexAttribArray(0);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glDeleteBuffers(1, &ColorBufferId);
-	glDeleteBuffers(1, &VboId);
+	glDeleteBuffers(1, &backgroundColorBufferId);
+	glDeleteBuffers(1, &backgroundVbo);
 
 	glBindVertexArray(0);
-	glDeleteVertexArrays(1, &VaoId);
+	//glDeleteVertexArrays(1, &VaoId);
 }
 
 void Game::InitializeGame(const char* vertShader, const char* fragShader) {
@@ -66,7 +69,7 @@ void Game::InitializeGame(const char* vertShader, const char* fragShader) {
 
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	CreateVBO();
-	CreateShaders(vertShader, fragShader);
+	//CreateShaders(vertShader, fragShader);
 }
 
 void Game::CreateVBO() {
@@ -146,45 +149,72 @@ void Game::CreateVBO() {
 		1.0f, 0.8f, 0.0f, 1.0f,
 		1.0f, 0.8f, 0.0f, 1.0f
 	};
-
-	// se creeaza un buffer nou
-	glGenBuffers(1, &VboId);
-	// este setat ca buffer curent
-	glBindBuffer(GL_ARRAY_BUFFER, VboId);
-	// punctele sunt "copiate" in bufferul curent
-	glBufferData(GL_ARRAY_BUFFER, sizeof(Vertices), Vertices, GL_STATIC_DRAW);
-
-	// se creeaza / se leaga un VAO (Vertex Array Object) - util cand se utilizeaza mai multe VBO
-	glGenVertexArrays(1, &VaoId);
-	glBindVertexArray(VaoId);
-	// se activeaza lucrul cu atribute; atributul 0 = pozitie
-	glEnableVertexAttribArray(0);
-	// 
-	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
-
-	// un nou buffer, pentru culoare
-	glGenBuffers(1, &ColorBufferId);
-	glBindBuffer(GL_ARRAY_BUFFER, ColorBufferId);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(Colors), Colors, GL_STATIC_DRAW);
-	// atributul 1 =  culoare
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
 }
 
 void Game::RenderFunction(void) {
+	glm::mat4 background = glm::scale(glm::mat4(1.0f), glm::vec3(1.f / maxX, 1.f / maxY, 1.0));
+	background = glm::translate(glm::mat4(1.0f), glm::vec3(-maxX, -maxY, 0.0)) * background;
+
+	glBindVertexArray(backgroundVao);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, backgroundEbo);
+
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	myMatrixLocation = glGetUniformLocation(ProgramId, "myMatrix");
-	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &myMatrix[0][0]);
+	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &background[0][0]);
 
 	glPointSize(10.0);
-	glDrawArrays(GL_TRIANGLES, 0, 3);
+	glDrawArrays(GL_POINTS, 0, nrOfStars);
+
+	/*glDrawArrays(GL_TRIANGLES, 0, 3);
 	glDrawArrays(GL_TRIANGLES, 3, 3);
 	glDrawArrays(GL_POLYGON, 6, 4);
 	glDrawArrays(GL_TRIANGLES, 10, 3);
 	glDrawArrays(GL_POLYGON, 13, 5);
 	glDrawArrays(GL_POLYGON, 18, 5);
 
+	*/
 	glutPostRedisplay();
 	glFlush();
+	
+}
+
+void Game::CreateBackgroundBuffers()
+{	
+	GLfloat Vertices[1000];
+	GLfloat Colors[1000];
+
+	srand(time(NULL));
+	int i = 0;
+	while (i < nrOfStars) {
+		Vertices[4 * i] = float(rand() % (2 * getWidth()) + 1);
+		Vertices[4 * i + 1] = float(rand() % (2 * getHeight()) + 1);
+		Vertices[4 * i + 2] = 0.f;
+		Vertices[4 * i + 3] = 1.f;
+		cout << i << " " << Vertices[4 * i] << " " << Vertices[4 * i + 1] << " " << Vertices[4 * i + 2] << " " << Vertices[4 * i + 3] << "\n";
+		Colors[4 * i] = 1.f;
+		Colors[4 * i + 1] = 1.f;
+		Colors[4 * i + 2] = 1.f;
+		Colors[4 * i + 3] = 1.f;
+		cout << i << " " << Colors[4 * i] << " " << Colors[4 * i + 1] << " " << Colors[4 * i + 2] << " " << Colors[4 * i + 3] << "\n";
+		i++;
+	}
+
+    int verticesCount = sizeof(Vertices) / sizeof(GLfloat);
+
+    glGenBuffers(1, &backgroundVbo);
+    glBindBuffer(GL_ARRAY_BUFFER, backgroundVbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertices), Vertices, GL_STATIC_DRAW);
+
+    glGenVertexArrays(1, &backgroundVao);
+    glBindVertexArray(backgroundVao);
+
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
+    glEnableVertexAttribArray(0);
+
+	glGenBuffers(1, &backgroundColorBufferId);
+	glBindBuffer(GL_ARRAY_BUFFER, backgroundColorBufferId);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(Colors), Colors, GL_STATIC_DRAW);
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
+    glEnableVertexAttribArray(1);
 }

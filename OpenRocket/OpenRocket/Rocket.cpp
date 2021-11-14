@@ -20,28 +20,28 @@ void Rocket::MoveRocket(int key, int x, int y) {
 	switch (key)
 	{
 		case GLUT_KEY_RIGHT:
-			if (positionX + 10 < Constants::maxX - boundsOffsetX) {
+			if (positionX + 10 <= Constants::maxX - boundsOffsetX) {
 				positionX += 10;
 			}
-			//cout << positionX << " " << positionY << "\n";
+			cout << positionX << " " << positionY << "\n";
 			break;
 		case GLUT_KEY_LEFT:  
-			if (positionX - 10 > -boundsOffsetX) {
+			if (positionX - 10 >= -boundsOffsetX) {
 				positionX -= 10;
 			}
-			//cout << positionX << " " << positionY << "\n";
+			cout << positionX << " " << positionY << "\n";
 			break;
 		case GLUT_KEY_UP:    
-			if (positionY + 10 < Constants::maxY - boundsOffsetY) {
+			if (positionY + 10 <= Constants::maxY - boundsOffsetY) {
 				positionY += 10;
 			}
-			//cout << positionX << " " << positionY << "\n"; 
+			cout << positionX << " " << positionY << "\n"; 
 			break;
 		case GLUT_KEY_DOWN:  
-			if (positionY - 10 > -boundsOffsetY) {
+			if (positionY - 10 >= -boundsOffsetY) {
 				positionY -= 10;
 			}
-			//cout << positionX << " " << positionY << "\n"; 
+			cout << positionX << " " << positionY << "\n"; 
 			break;
 	}
 }

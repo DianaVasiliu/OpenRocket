@@ -54,7 +54,8 @@ void Game::InitializeGlew() {
 	glutCreateWindow(Constants::title);
 	glewInit();
 	glutDisplayFunc(renderCallback);
-	glutSpecialFunc(keysCallback);
+	glutSpecialFunc(keysDownCallback);
+	glutSpecialUpFunc(keysUpCallback);
 	glutCloseFunc(cleanupCallback);
 }
 

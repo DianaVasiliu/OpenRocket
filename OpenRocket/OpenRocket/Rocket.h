@@ -1,7 +1,8 @@
 
 #include <GL/glew.h>
 #include <GL/freeglut.h>
-
+#include <ctime>
+#include <chrono>
 #include "glm/glm/glm.hpp"  
 #include "glm/glm/ext/matrix_transform.hpp"
 #include "glm/glm/gtx/transform.hpp"
@@ -22,6 +23,18 @@ private:
 	float boundsOffsetX = 25;
 	float boundsOffsetY = 135;
 
+	bool rightIsPressed = false;
+	bool leftIsPressed = false;
+	bool upIsPressed = false;
+	bool downIsPressed = false;
+
+	float moveAmount = 20;
+
+	std::chrono::time_point<std::chrono::system_clock> rightPressTime;
+	std::chrono::time_point<std::chrono::system_clock> leftPressTime;
+	std::chrono::time_point<std::chrono::system_clock> upPressTime;
+	std::chrono::time_point<std::chrono::system_clock> downPressTime;
+
 public:
     Rocket();
     static Rocket* getInstance();
@@ -35,4 +48,9 @@ public:
 
 	void Update();
 	void MoveRocket(int key, int x, int y);
+	void MarkKeyDown(int key, int x, int y);
+	void MoveRight();
+	void MoveLeft();
+	void MoveUp();
+	void MoveDown();
 };

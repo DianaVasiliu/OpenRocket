@@ -19,21 +19,29 @@ Rocket* Rocket::getInstance() {
 void Rocket::MoveRocket(int key, int x, int y) {
 	switch (key)
 	{
-		case GLUT_KEY_RIGHT: 
-			positionX += 10;   
-			cout << positionX << " " << positionY << "\n";
+		case GLUT_KEY_RIGHT:
+			if (positionX + 10 < Constants::maxX - boundsOffsetX) {
+				positionX += 10;
+			}
+			//cout << positionX << " " << positionY << "\n";
 			break;
 		case GLUT_KEY_LEFT:  
-			positionX -= 10;   
-			cout << positionX << " " << positionY << "\n";
+			if (positionX - 10 > -boundsOffsetX) {
+				positionX -= 10;
+			}
+			//cout << positionX << " " << positionY << "\n";
 			break;
 		case GLUT_KEY_UP:    
-			positionY += 10;  
-			cout << positionX << " " << positionY << "\n"; 
+			if (positionY + 10 < Constants::maxY - boundsOffsetY) {
+				positionY += 10;
+			}
+			//cout << positionX << " " << positionY << "\n"; 
 			break;
 		case GLUT_KEY_DOWN:  
-			positionY -= 10;  
-			cout << positionX << " " << positionY << "\n"; 
+			if (positionY - 10 > -boundsOffsetY) {
+				positionY -= 10;
+			}
+			//cout << positionX << " " << positionY << "\n"; 
 			break;
 	}
 }

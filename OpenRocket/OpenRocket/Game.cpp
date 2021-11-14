@@ -22,15 +22,17 @@ Game* Game::instance = nullptr;
 
 Game* Game::getInstance() {
 	if (instance == nullptr) {
-		instance = new Game(Constants::width * 2, Constants::height * 2, 60, 60);
+		instance = new Game(60, 60);
 	}
 	return instance;
 }
 
-Game::Game(int window_width, int window_height, int initial_pos_x, int initial_pos_y) :
+Game::Game(int initial_pos_x, int initial_pos_y) :
 	nrOfStars(Constants::nrOfStars),
-	width(window_width),
-	height(window_height),
+	width(Constants::maxX),
+	height(Constants::maxY),
+	maxX(Constants::maxX),
+	maxY(Constants::maxY),
 	rocketMatrix(glm::mat4(1.0f)),
 	rocketScaleMatrix(glm::mat4(1.0f)),
 	rocketRotateMatrix(glm::mat4(1.0f)),

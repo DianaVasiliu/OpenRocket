@@ -62,7 +62,7 @@ private:
 	glm::mat4 mTest;
 
 public:
-	Game(int window_width, int window_height, int initial_pos_x, int initial_pos_y);
+	Game(int initial_pos_x, int initial_pos_y);
 	~Game();
 
 	static Game* getInstance();

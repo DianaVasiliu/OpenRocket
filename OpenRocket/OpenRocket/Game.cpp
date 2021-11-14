@@ -119,9 +119,9 @@ void Game::FireAnimation() {
 	}
 
 	float orangeTail = 50.0f + fireTail;
-	float leftSideX = 0.f - fireSides;
+	float leftSideX = 775 + 0.f - fireSides;
 	float leftSideY = 85.f - fireSides;
-	float rightSideX = 50.f + fireSides;
+	float rightSideX = 775 + 50.f + fireSides;
 	float rightSideY = 85.f - fireSides;
 	float yellowTail = 70.f + fireTail;
 	glNamedBufferSubData(rocketVbo, 15 * 4 * sizeof(GLfloat), sizeof(GLfloat), &rightSideX);
@@ -248,18 +248,18 @@ void Game::CreateRocketBuffers() {
 		800.f, 210.f, 0.f, 1.f,
 
 		// Focul portocaliu
-		15.f, 100.f, 0.f, 1.f,
-		35.f, 100.f, 0.f, 1.f,
-		50.f, 85.f, 0.f, 1.f, // dreapta
-		25.f, 50.f, 0.f, 1.f, // varful de jos
-		0.f, 85.f, 0.f, 1.f, // stanga
+		775 + 15.f, 100.f, 0.f, 1.f,
+		775 + 35.f, 100.f, 0.f, 1.f,
+		775 + 50.f, 85.f, 0.f, 1.f, // dreapta
+		775 + 25.f, 50.f, 0.f, 1.f, // varful de jos
+		775 + 0.f, 85.f, 0.f, 1.f, // stanga
 
 		// Focul galben
-		15.f, 100.f, 0.f, 1.f,
-		35.f, 100.f, 0.f, 1.f,
-		40.f, 90.f, 0.f, 1.f,
-		25.f, 70.f, 0.f, 1.f, // varful de jos
-		10.f, 90.f, 0.f, 1.f,
+		775 + 15.f, 100.f, 0.f, 1.f,
+		775 + 35.f, 100.f, 0.f, 1.f,
+		775 + 40.f, 90.f, 0.f, 1.f,
+		775 + 25.f, 70.f, 0.f, 1.f, // varful de jos
+		775 + 10.f, 90.f, 0.f, 1.f,
 
 	};
 

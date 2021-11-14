@@ -54,7 +54,8 @@ void Game::InitializeGlew() {
 	glutCreateWindow(Constants::title);
 	glewInit();
 	glutDisplayFunc(renderCallback);
-	glutSpecialFunc(keysCallback);
+	glutSpecialFunc(keysDownCallback);
+	glutSpecialUpFunc(keysUpCallback);
 	glutCloseFunc(cleanupCallback);
 }
 
@@ -95,6 +96,42 @@ void Game::InitializeGame(const char* vertShader, const char* fragShader) {
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 }
 
+void Game::FireAnimation() {
+	if (fireTail >= resetTailEvery) {
+		fireTail = resetTailEvery;
+		fireSides = 0;
+		fireGoingDown = true;
+		fireGoingUp = false;
+	}
+	else if (fireTail <= 0) {
+		fireTail = 0;
+		fireSides = resetSidesEvery;
+		fireGoingUp = true;
+		fireGoingDown = false;
+	}
+	if (fireGoingUp) {
+		fireTail += fireTailVelocity;
+		fireSides -= fireSidesVelocity;
+	}
+	else if (fireGoingDown) {
+		fireTail -= fireTailVelocity;
+		fireSides += fireSidesVelocity;
+	}
+
+	float orangeTail = 50.0f + fireTail;
+	float leftSideX = 775 + 0.f - fireSides;
+	float leftSideY = 85.f - fireSides;
+	float rightSideX = 775 + 50.f + fireSides;
+	float rightSideY = 85.f - fireSides;
+	float yellowTail = 70.f + fireTail;
+	glNamedBufferSubData(rocketVbo, 15 * 4 * sizeof(GLfloat), sizeof(GLfloat), &rightSideX);
+	glNamedBufferSubData(rocketVbo, (15 * 4 + 1) * sizeof(GLfloat), sizeof(GLfloat), &rightSideY);
+	glNamedBufferSubData(rocketVbo, 16 * 4 * sizeof(GLfloat) + 1 * sizeof(GLfloat), sizeof(GLfloat), &orangeTail);
+	glNamedBufferSubData(rocketVbo, 17 * 4 * sizeof(GLfloat), sizeof(GLfloat), &leftSideX);
+	glNamedBufferSubData(rocketVbo, (17 * 4 + 1) * sizeof(GLfloat), sizeof(GLfloat), &leftSideY);
+	glNamedBufferSubData(rocketVbo, 21 * 4 * sizeof(GLfloat) + 1 * sizeof(GLfloat), sizeof(GLfloat), &yellowTail);
+}
+
 void Game::RenderFunction(void) {
 
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -119,6 +156,8 @@ void Game::RenderFunction(void) {
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, backgroundEbo);
 	glDrawArrays(GL_POINTS, 0, nrOfStars);	
 
+	FireAnimation();
+
 	Rocket* rocket = Rocket::getInstance();
 	int posX = rocket->getPositionX();
 	int posY = rocket->getPositionY();
@@ -136,6 +175,7 @@ void Game::RenderFunction(void) {
 	glDrawArrays(GL_TRIANGLES, 3, 3);
 	glDrawArrays(GL_POLYGON, 6, 4);
 	glDrawArrays(GL_TRIANGLES, 10, 3);
+
 	glDrawArrays(GL_POLYGON, 13, 5);
 	glDrawArrays(GL_POLYGON, 18, 5);
 	
@@ -208,18 +248,18 @@ void Game::CreateRocketBuffers() {
 		800.f, 210.f, 0.f, 1.f,
 
 		// Focul portocaliu
-		790.f, 100.f, 0.f, 1.f,
-		810.f, 100.f, 0.f, 1.f,
-		825.f, 85.f, 0.f, 1.f,
-		800.f, 50.f, 0.f, 1.f,
-		775.f, 85.f, 0.f, 1.f,
+		775 + 15.f, 100.f, 0.f, 1.f,
+		775 + 35.f, 100.f, 0.f, 1.f,
+		775 + 50.f, 85.f, 0.f, 1.f, // dreapta
+		775 + 25.f, 50.f, 0.f, 1.f, // varful de jos
+		775 + 0.f, 85.f, 0.f, 1.f, // stanga
 
 		// Focul galben
-		790.f, 100.f, 0.f, 1.f,
-		810.f, 100.f, 0.f, 1.f,
-		815.f, 90.f, 0.f, 1.f,
-		800.f, 80.f, 0.f, 1.f,
-		785.f, 90.f, 0.f, 1.f,
+		775 + 15.f, 100.f, 0.f, 1.f,
+		775 + 35.f, 100.f, 0.f, 1.f,
+		775 + 40.f, 90.f, 0.f, 1.f,
+		775 + 25.f, 70.f, 0.f, 1.f, // varful de jos
+		775 + 10.f, 90.f, 0.f, 1.f,
 
 	};
 

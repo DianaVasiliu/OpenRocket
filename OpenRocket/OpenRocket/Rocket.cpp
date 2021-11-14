@@ -17,31 +17,90 @@ Rocket* Rocket::getInstance() {
 }
 
 void Rocket::MoveRocket(int key, int x, int y) {
-	switch (key)
-	{
-		case GLUT_KEY_RIGHT:
-			if (positionX + 10 <= Constants::maxX - boundsOffsetX) {
-				positionX += 10;
-			}
-			cout << positionX << " " << positionY << "\n";
-			break;
-		case GLUT_KEY_LEFT:  
-			if (positionX - 10 >= -boundsOffsetX) {
-				positionX -= 10;
-			}
-			cout << positionX << " " << positionY << "\n";
-			break;
-		case GLUT_KEY_UP:    
-			if (positionY + 10 <= Constants::maxY - boundsOffsetY) {
-				positionY += 10;
-			}
-			cout << positionX << " " << positionY << "\n"; 
-			break;
-		case GLUT_KEY_DOWN:  
-			if (positionY - 10 >= -boundsOffsetY) {
-				positionY -= 10;
-			}
-			cout << positionX << " " << positionY << "\n"; 
-			break;
+	if (key == GLUT_KEY_RIGHT && rightIsPressed) {
+		rightIsPressed = false;
+	} 
+	if (key == GLUT_KEY_LEFT && leftIsPressed) {
+		leftIsPressed = false;
+	}
+	if (key == GLUT_KEY_UP && upIsPressed) {
+		upIsPressed = false;
+	}
+	if (key == GLUT_KEY_DOWN && downIsPressed) {
+		downIsPressed = false;
+	}
+}
+
+void Rocket::MoveRight() {
+	if (positionX + moveAmount < Constants::maxX - boundsOffsetX) {
+		positionX += moveAmount;
+	}
+}
+void Rocket::MoveLeft() {
+	if (positionX - moveAmount > -boundsOffsetX) {
+		positionX -= moveAmount;
+	}
+}
+void Rocket::MoveUp() {
+	if (positionY + moveAmount < Constants::maxY - boundsOffsetY) {
+		positionY += moveAmount;
+	}
+}
+void Rocket::MoveDown() {
+	if (positionY - moveAmount > -boundsOffsetY) {
+		positionY -= moveAmount;
+	}
+}
+
+
+
+void Rocket::MarkKeyDown(int key, int x, int y) {
+	if (key == GLUT_KEY_RIGHT) {
+		rightIsPressed = true;
+		MoveRight();
+		if (upIsPressed) 
+		{
+			MoveUp();
+		}
+		else if (downIsPressed) 
+		{
+			MoveUp();
+		}
+	}
+	if (key == GLUT_KEY_LEFT) {
+		MoveLeft();
+		leftIsPressed = true;
+		if (upIsPressed)
+		{
+			MoveUp();
+		}
+		else if (downIsPressed)
+		{
+			MoveDown();
+		}
+	}
+	if (key == GLUT_KEY_UP) {
+		MoveUp();
+		upIsPressed = true;
+		if (rightIsPressed)
+		{
+			MoveRight();
+		}
+		else if (leftIsPressed)
+		{
+			MoveLeft();
+		}
+	}
+	if (key == GLUT_KEY_DOWN) {
+		MoveDown();
+		downIsPressed = true;
+		if (rightIsPressed)
+		{
+			MoveRight();
+		}
+		else if (leftIsPressed)
+		{
+			MoveLeft();
+		}
 	}
 }

@@ -25,6 +25,7 @@ private:
 	glm::mat4 backgroundRotateMatrix = glm::mat4(1.0f);
 	glm::mat4 backgroundTranslateMatrix = glm::mat4(1.0f);
 
+	GLfloat RocketVertices[1000];
 	GLuint rocketVao;
 	GLuint rocketVbo;
 	GLuint rocketColorBufferId;
@@ -32,6 +33,15 @@ private:
 	glm::mat4 rocketScaleMatrix = glm::mat4(1.0f);
 	glm::mat4 rocketRotateMatrix = glm::mat4(1.0f);
 	glm::mat4 rocketTranslateMatrix = glm::mat4(1.0f);
+
+	float fireTailVelocity = 0.0075;
+	float fireSidesVelocity = fireTailVelocity / 4;
+	float resetTailEvery = 10.0;
+	float resetSidesEvery = resetTailEvery / 4;
+	float fireTail = 0.0;
+	float fireSides = 0.0;
+	float fireGoingUp = true;
+	float fireGoingDown = false;
 
 	GLuint asteroidVao;
 	GLuint asteroidVbo;
@@ -89,4 +99,5 @@ public:
 
 	void InitializeGame(const char* vertShader, const char* fragShader);
 	void RenderFunction(void);
+	void FireAnimation();
 };

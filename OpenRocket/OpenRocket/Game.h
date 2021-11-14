@@ -2,6 +2,8 @@
 
 #include <GL/glew.h>
 #include <GL/freeglut.h>
+#include "Rocket.h"
+
 #include <vector>
 #include "glm/glm/glm.hpp"  
 #include "glm/glm/ext/matrix_transform.hpp"
@@ -19,10 +21,30 @@ private:
 	GLuint backgroundVbo;
 	GLuint backgroundEbo;
 	GLuint backgroundColorBufferId;
+	glm::mat4 backgroundMatrix = glm::mat4(1.0f);
+	glm::mat4 backgroundScaleMatrix = glm::mat4(1.0f);
+	glm::mat4 backgroundRotateMatrix = glm::mat4(1.0f);
+	glm::mat4 backgroundTranslateMatrix = glm::mat4(1.0f);
+	float rotationAngle = 0.0f;
+	float rotationSpeed = 0.0005f;
 
+	GLfloat RocketVertices[1000];
 	GLuint rocketVao;
 	GLuint rocketVbo;
 	GLuint rocketColorBufferId;
+	glm::mat4 rocketMatrix = glm::mat4(1.0f);
+	glm::mat4 rocketScaleMatrix = glm::mat4(1.0f);
+	glm::mat4 rocketRotateMatrix = glm::mat4(1.0f);
+	glm::mat4 rocketTranslateMatrix = glm::mat4(1.0f);
+
+	float fireTailVelocity = 0.0075;
+	float fireSidesVelocity = fireTailVelocity / 4;
+	float resetTailEvery = 10.0;
+	float resetSidesEvery = resetTailEvery / 4;
+	float fireTail = 0.0;
+	float fireSides = 0.0;
+	float fireGoingUp = true;
+	float fireGoingDown = false;
 
 	GLuint asteroidVao;
 	GLuint asteroidVbo;
@@ -54,7 +76,7 @@ private:
 	glm::mat4 mTest;
 
 public:
-	Game(int window_width, int window_height, int initial_pos_x, int initial_pos_y);
+	Game(int initial_pos_x, int initial_pos_y);
 	~Game();
 	vector<Asteroid*> asteroids;
 	static Game* getInstance();
@@ -71,6 +93,8 @@ public:
 
 	void CreateBackgroundBuffers();
 	void CreateRocketBuffers();
+	void moveRocket(int key, int x, int y);
+
 	void CreateAsteroidBuffers();
 	void InitializeGlew();
 	void CreateShaders(const char* vertShader, const char* fragShader);
@@ -86,4 +110,5 @@ public:
 	float generateXOffset();
 	void move();
 	void mouseHandler(int, int, int, int);
+	void FireAnimation();
 };

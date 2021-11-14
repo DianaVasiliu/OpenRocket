@@ -1,4 +1,4 @@
-#include "Game.h"
+#include "helpers.h"
 
 void cleanupCallback() {
 	Game* game = Game::getInstance();
@@ -8,6 +8,16 @@ void cleanupCallback() {
 void renderCallback() {
 	Game* game = Game::getInstance();
 	game->RenderFunction();
+}
+
+void keysDownCallback(int key, int x, int y) {
+	Rocket* rocket = Rocket::getInstance();
+	rocket->MarkKeyDown(key, x, y);
+}
+
+void keysUpCallback(int key, int x, int y) {
+	Rocket* rocket = Rocket::getInstance();
+	rocket->MoveRocket(key, x, y);
 }
 void moveCallback() {
 	Game* game = Game::getInstance();

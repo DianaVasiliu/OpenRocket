@@ -24,6 +24,8 @@ private:
 	glm::mat4 backgroundScaleMatrix = glm::mat4(1.0f);
 	glm::mat4 backgroundRotateMatrix = glm::mat4(1.0f);
 	glm::mat4 backgroundTranslateMatrix = glm::mat4(1.0f);
+	float rotationAngle = 0.0f;
+	float rotationSpeed = 0.0005f;
 
 	GLfloat RocketVertices[1000];
 	GLuint rocketVao;

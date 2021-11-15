@@ -383,6 +383,8 @@ void Game::CreateAsteroidBuffers() {
 		cout << "angle " << float(Constants::TWO_PI * float(k)) / float(Constants::nrOfVerticesPerCircle) << "\n";
 		float x = cos(theta);
 		float y = sin(theta);
+		Asteroid::circleCenter = { 0.0f, 0.0f, 0.0f, 1.0f };
+		Asteroid::circlePoint = { cos(theta), sin(theta), 0.0f, 1.0f };
 		// varfurile corespunzatoare cercului
 		Vertices[4 * k] = x;
 		Vertices[4 * k + 1] = y;

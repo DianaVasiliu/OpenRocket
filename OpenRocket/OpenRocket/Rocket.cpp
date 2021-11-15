@@ -196,19 +196,9 @@ void Rocket::CalculateCurrentPositions() {
 
 void Rocket::RocketAsteroidsCollision(vector<Asteroid*> asteroids) 
 {
-	glm::vec4 center;
-	glm::vec4 point;
 	for (int i = 0; i < int(asteroids.size()); i++) {
-		center[0] = asteroids[i]->getX();
-		center[1] = asteroids[i]->getY();
-		center[2] = 0.f;
-		center[3] = 1.f;
-		glm::vec4 currentCenter = center * asteroids[i]->asteroidMatrix;
-		point[0] = asteroids[i]->getX() - asteroids[i]->getRadius();
-		point[1] = asteroids[i]->getY();
-		point[2] = 0.f;
-		point[3] = 1.f;
-		glm::vec4 currentPoint = point * asteroids[i]->asteroidMatrix;
+		glm::vec4 currentCenter = Asteroid::circleCenter * asteroids[i]->asteroidMatrix;
+		glm::vec4 currentPoint = Asteroid::circlePoint * asteroids[i]->asteroidMatrix;
 		double radius = sqrt(pow(currentCenter[0] - currentPoint[0], 2) + pow(currentCenter[1] - currentPoint[1], 2));
 		CalculateCurrentPositions();
 

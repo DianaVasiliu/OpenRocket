@@ -20,6 +20,8 @@ private:
 	float translatedDistance;
 public:
 	glm::mat4 asteroidMatrix;
+	static glm::vec4 circlePoint;
+	static glm::vec4 circleCenter;
 public:
 	Asteroid(float, int, glm::vec<4, float, (glm::qualifier)0>, glm::vec<4, float, (glm::qualifier)0>);
 	~Asteroid() { };

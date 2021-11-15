@@ -172,7 +172,7 @@ void Game::RenderFunction(void) {
 
 	myMatrixLocation = glGetUniformLocation(ProgramId, "myMatrix");
 	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &backgroundMatrix[0][0]);
-
+ 
 	glPointSize(2.0);
 	glBindVertexArray(backgroundVao);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, backgroundEbo);
@@ -207,6 +207,7 @@ void Game::RenderFunction(void) {
 		
 		glm::mat4 asteroidMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(asteroid->getRadius(), asteroid->getRadius(), 1.0));
 		glm::mat4 animateMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0, - asteroid->getTranslatedDistance(), 0.0)); // controleaza translatia de-a lungul lui Oy
+		backgroundMatrix = backgroundScaleMatrix * backgroundTranslateMatrix;
 		asteroidMatrix = backgroundMatrix *  animateMatrix * glm::translate(glm::mat4(1.0f), glm::vec3(asteroid->getX(), asteroid->getY(), 0.0)) * asteroidMatrix;
 		
 		glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &asteroidMatrix[0][0]);

@@ -4,18 +4,19 @@
 #include <GL/freeglut.h>
 #include "Rocket.h"
 
+#include <vector>
 #include "glm/glm/glm.hpp"  
 #include "glm/glm/ext/matrix_transform.hpp"
 #include "glm/glm/gtx/transform.hpp"
 #include "glm/glm/gtc/type_ptr.hpp"
 #include "Constants.h"
+#include "Asteroid.h"
 
 using namespace std;
 
 class Game {
 private:
 	static Game* instance;
-
 	GLuint backgroundVao;
 	GLuint backgroundVbo;
 	GLuint backgroundEbo;
@@ -47,6 +48,7 @@ private:
 
 	GLuint asteroidVao;
 	GLuint asteroidVbo;
+	GLuint asteroidColorBufferId;
 
 	int width;
 	int height;
@@ -76,7 +78,7 @@ private:
 public:
 	Game(int initial_pos_x, int initial_pos_y);
 	~Game();
-
+	vector<Asteroid*> asteroids;
 	static Game* getInstance();
 
 	void setHeight(int h) { height = h; }
@@ -93,6 +95,7 @@ public:
 	void CreateRocketBuffers();
 	void moveRocket(int key, int x, int y);
 
+	void CreateAsteroidBuffers();
 	void InitializeGlew();
 	void CreateShaders(const char* vertShader, const char* fragShader);
 	void DestroyShaders(void);
@@ -101,5 +104,11 @@ public:
 
 	void InitializeGame(const char* vertShader, const char* fragShader);
 	void RenderFunction(void);
+	void GenerateAsteroids();
+	Asteroid* GenerateSingleAsteroid();
+	void UpdateAsteroids();
+	float generateXOffset();
+	void move();
+	void mouseHandler(int, int, int, int);
 	void FireAnimation();
 };

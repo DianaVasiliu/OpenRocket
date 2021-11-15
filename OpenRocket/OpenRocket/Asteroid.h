@@ -19,15 +19,22 @@ private:
 	float radius;
 	float translatedDistance;
 public:
-	Asteroid(float, int, glm::vec4, glm::vec4);
+	glm::mat4 asteroidMatrix;
+public:
+	Asteroid(float, int, glm::vec<4, float, (glm::qualifier)0>, glm::vec<4, float, (glm::qualifier)0>);
+	~Asteroid() { };
+
 	bool isInViewport();
 	bool belowViewport();
+
 	float getX();
+	float getY();
+	float getRadius();
+	float getTranslatedDistance();
+	glm::mat4 getAsteroidMatrix() { return asteroidMatrix; }
+
 	void setX(float);
 	void setY(float);
-	float getTranslatedDistance();
 	void setTranslatedDistance(float);
-	float getRadius();
-	float getY();
-	~Asteroid() { };
+	void setAsteroidMatrix(glm::mat4 matrix) { asteroidMatrix = matrix; }
 };

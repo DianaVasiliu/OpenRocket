@@ -111,4 +111,5 @@ public:
 	void move();
 	void mouseHandler(int, int, int, int);
 	void FireAnimation();
+	void RocketAsteroidCollision();
 };

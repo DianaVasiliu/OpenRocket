@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 
 class Constants
 {
@@ -18,4 +19,8 @@ public:
     static const float asteroidMovingUnit;
     static const float maxXDistance;
     static const float maxYDistance;
+    static const std::string xCoord;
+    static const std::string yCoord;
+    static const std::string RED;
+    static const std::string SAFE;
 };

@@ -19,3 +19,10 @@ const std::string Constants::xCoord = "x";
 const std::string Constants::yCoord = "y";
 const std::string Constants::RED = "Red Zone";
 const std::string Constants::SAFE= "Safe Zone";
+const std::vector<const char*> Constants::textureImages{
+	"blueAsteroid.png",
+	"brightOrangeAsteroid.png",
+	"orangeAsteroid.png",
+	"turquoiseAsteroid.png"
+};
+const int Constants::nrOfTextures = 4;

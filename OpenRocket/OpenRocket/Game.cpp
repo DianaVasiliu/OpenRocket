@@ -105,9 +105,8 @@ void Game::InitializeGame(const char* vertShader, const char* fragShader) {
 	myMatrix = resizeMatrix * matrTransl;
 
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-	LoadTexture(texture, "blueAsteroid.png");
+	Game::loadTextures();
 }
-
 void Game::FireAnimation() {
 	if (fireTail >= resetTailEvery) {
 		fireTail = resetTailEvery;
@@ -199,9 +198,9 @@ void Game::RenderFunction(void) {
 	myMatrixLocation = glGetUniformLocation(TextureProgramId, "myMatrix");
 	
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, texture);
+	
 	for (auto& asteroid : asteroids) {
-
+		glBindTexture(GL_TEXTURE_2D, textures[asteroid->getTextureIndex()]);
 		glm::mat4 asteroidMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(asteroid->getRadius(), asteroid->getRadius(), 1.0));
 		glm::mat4 animateMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0, - asteroid->getTranslatedDistance(), 0.0)); // controleaza translatia de-a lungul lui Oy
 		backgroundMatrix = backgroundScaleMatrix * backgroundTranslateMatrix;
@@ -346,7 +345,7 @@ void Game::CreateAsteroidBuffers() {
 		Vertices[9 * k + 5] = 0.0f;
 		Vertices[9 * k + 6] = 0.0f;
 
-		cout << (float)k / 18 << " ";
+		//cout << (float)k / 18 << " ";
 		Vertices[9 * k + 7] = (sin(theta) + 1) / 2;
 		Vertices[9 * k + 8] = (cos(theta) + 1)/ 2;
 	}
@@ -436,4 +435,11 @@ void Game::LoadTexture(GLuint &texture, const char* imageName)
 
 	SOIL_free_image_data(image);
 	glBindTexture(GL_TEXTURE_2D, 0);
+}
+void Game::loadTextures() {
+	for (auto& imageName : Constants::textureImages) {
+		GLuint texture;
+		LoadTexture(texture, imageName);
+		textures.push_back(texture);
+	}	
 }

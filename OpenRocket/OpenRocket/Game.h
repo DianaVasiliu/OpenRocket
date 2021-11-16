@@ -14,7 +14,7 @@
 
 using namespace std;
 
-static GLuint texture;
+static vector<GLuint> textures;
 
 class Game {
 private:
@@ -119,4 +119,5 @@ public:
 	void FireAnimation();
 	void RocketAsteroidCollision();
 	void LoadTexture(GLuint&, const char*);
+	void loadTextures();
 };

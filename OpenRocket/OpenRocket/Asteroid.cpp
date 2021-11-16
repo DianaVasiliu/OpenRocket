@@ -6,6 +6,7 @@ glm::vec4 Asteroid::circleCenter = glm::vec4(0.0f);
 
 Asteroid::Asteroid(float radius = 40.0f, int nrOfVertices = 16, glm::vec4 coordinates = glm::vec4(0.0f,0.0f, 0.0f, 0.0f), 
 	glm::vec4 colors = glm::vec4(0.0f, 0.0f,0.0f,0.0f)) : radius(radius), nrOfVertices(nrOfVertices), coordinates(coordinates), colors(colors), translatedDistance(0), currentZone(Constants::SAFE) {
+	textureIndex = rand() % Constants::nrOfTextures;
 };
 bool Asteroid::isInViewport() {
 	return this->coordinates.y - this->translatedDistance < Constants::height && !this->belowViewport();
@@ -26,6 +27,9 @@ void Asteroid::updateState() {
 	if (Asteroid::inLowerHalf()) {
 		Asteroid::setCurrentZone(Constants::RED);
 	}
+}
+int Asteroid::getTextureIndex() {
+	return this->textureIndex;
 }
 float Asteroid::getX() { return this->coordinates.x; }
 float Asteroid::getRealY() { return this->coordinates.y - this->translatedDistance; }

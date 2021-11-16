@@ -9,7 +9,7 @@ Rocket* Rocket::instance = nullptr;
 
 void displayMatrix(glm::mat4 matrix)
 {
-	cout << "intra aici";
+	//cout << "intra aici";
 	for (int ii = 0; ii < 4; ii++)
 	{
 		for (int jj = 0; jj < 4; jj++)
@@ -222,7 +222,7 @@ void Rocket::RocketAsteroidsCollision(vector<Asteroid*> asteroids)
 		if (condition1 || condition2 || condition3 || condition4 || condition5 || condition6 || 
 			condition7 || condition8 || condition9 || condition10 || condition11 || condition12 )
 		{
-			cout << "coliziunee\n";
+			//cout << "coliziunee\n";
 		}
 		//cout << "dist " << dist(currentCenter, currentFrontTriangle.left, currentFrontTriangle.right) << "\n";
 

@@ -270,8 +270,6 @@ void Game::RenderFunction(void) {
 		glBindVertexArray(bulletVao);
 		glDrawArrays(GL_POLYGON, 0, Constants::nrOfVerticesPerCircle);
 	}	
-	
-	}
 
 	/*glBindVertexArray(squareVao);
 	matrix = scaleMatrix * translateMatrix;

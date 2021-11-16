@@ -1,23 +1,37 @@
 
 #include <GL/glew.h>
 #include <GL/freeglut.h>
-#include <ctime>
-#include <chrono>
+#include <vector>
 #include "glm/glm/glm.hpp"  
 #include "glm/glm/ext/matrix_transform.hpp"
 #include "glm/glm/gtx/transform.hpp"
 #include "glm/glm/gtc/type_ptr.hpp"
 #include "Constants.h"
+#include "Asteroid.h"
+
+struct Point {
+	float x;
+	float y;
+};
+
+struct Triangle {
+	glm::vec4 top;
+	glm::vec4 left;
+	glm::vec4 right;
+};
+
+struct Rect {
+	glm::vec4 topLeft;
+	glm::vec4 topRight;
+	glm::vec4 bottomLeft;
+	glm::vec4 bottomRight;
+};
 
 class Rocket {
 private:
     static Rocket* instance;
     
-	glm::mat4 rocketMatrix = glm::mat4(1.0f);
-	glm::mat4 rocketScaleMatrix = glm::mat4(1.0f);
-	glm::mat4 rocketRotateMatrix = glm::mat4(1.0f);
-	glm::mat4 rocketTranslateMatrix = glm::mat4(1.0f);
-
+	glm::mat4 rocketMatrix;
 	float positionX = 0;
 	float positionY = 0;
 	float boundsOffsetX = 800;
@@ -30,24 +44,33 @@ private:
 
 	float moveAmount = 20;
 
-	std::chrono::time_point<std::chrono::system_clock> rightPressTime;
-	std::chrono::time_point<std::chrono::system_clock> leftPressTime;
-	std::chrono::time_point<std::chrono::system_clock> upPressTime;
-	std::chrono::time_point<std::chrono::system_clock> downPressTime;
+	bool isDead = false;
+
+public:
+	Triangle frontTriangle;
+	Triangle topWingsTriangle;
+	Triangle bottomWingsTriangle;
+	Rect body;
+
+	Triangle currentFrontTriangle;
+	Triangle currentTopWingsTriangle;
+	Triangle currentBottomWingsTriangle;
+	Rect currentBody;
 
 public:
     Rocket();
     static Rocket* getInstance();
 
 	glm::mat4 getRocketMatrix() { return rocketMatrix; }
-	glm::mat4 getRocketScaleMatrix() { return rocketScaleMatrix; }
-	glm::mat4 getRocketTranslateMatrix() { return rocketTranslateMatrix; }
-	glm::mat4 getRocketRotationMatrix() { return rocketRotateMatrix; }
 	float getPositionX() { return positionX; }
 	float getPositionY() { return positionY; }
 
+	void setRocketMatrix(glm::mat4 matrix) { rocketMatrix = matrix; }
+	void RocketAsteroidsCollision(vector<Asteroid*> asteroids);
+	void CalculateCurrentPositions();
+
 	void Update();
-	void MoveRocket(int key, int x, int y);
+	void MarkKeyUp(int key, int x, int y);
 	void MarkKeyDown(int key, int x, int y);
 	void MoveRight();
 	void MoveLeft();

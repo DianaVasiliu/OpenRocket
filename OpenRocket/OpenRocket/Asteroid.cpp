@@ -1,6 +1,9 @@
 #include "Asteroid.h"
 #include "Constants.h"
 
+glm::vec4 Asteroid::circlePoint = { 1.0f, 0.0f, 0.f, 1.f };
+glm::vec4 Asteroid::circleCenter = { 0.f, 0.0f, 0.f, 1.f };
+
 Asteroid::Asteroid(float radius = 40.0f, int nrOfVertices = 16, glm::vec4 coordinates = glm::vec4(0.0f,0.0f, 0.0f, 0.0f), 
 	glm::vec4 colors = glm::vec4(0.0f, 0.0f,0.0f,0.0f)) : 
 	radius(radius), 

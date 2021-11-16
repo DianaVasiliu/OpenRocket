@@ -57,6 +57,10 @@ private:
 	GLuint bulletVbo;
 	GLuint bulletColorBufferId;
 	double lastBulletTime = 0.0f;
+  
+	GLuint squareVao;
+	GLuint squareVbo;
+	GLuint squareColorBufferId;
 
 	int width;
 	int height;
@@ -127,4 +131,6 @@ public:
 
 	void UpdateBullets();
 	void GenerateBullet();
+  
+	void RocketAsteroidCollision();
 };

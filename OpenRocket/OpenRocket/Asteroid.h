@@ -22,20 +22,30 @@ private:
 	string currentZone;
 
 public:
-	Asteroid(float, int, glm::vec4, glm::vec4);
+	glm::mat4 asteroidMatrix;
+	static glm::vec4 circlePoint;
+	static glm::vec4 circleCenter;
+public:
+	Asteroid(float, int, glm::vec<4, float, (glm::qualifier)0>, glm::vec<4, float, (glm::qualifier)0>);
+	~Asteroid() { };
+
 	bool isInViewport();
 	void updateState();
 	bool inLowerHalf();
 	bool belowViewport();
+  
 	string getCurrentZone();
 	void setCurrentZone(string);
+
 	float getX();
+	float getY();
+	float getRadius();
+	float getTranslatedDistance();
+	glm::mat4 getAsteroidMatrix() { return asteroidMatrix; }
+
 	void setX(float);
 	float getRealY();
 	void setY(float);
-	float getTranslatedDistance();
 	void setTranslatedDistance(float);
-	float getRadius();
-	float getY();
-	~Asteroid() { };
+	void setAsteroidMatrix(glm::mat4 matrix) { asteroidMatrix = matrix; }
 };

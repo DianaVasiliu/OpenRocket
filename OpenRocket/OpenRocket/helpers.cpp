@@ -18,7 +18,7 @@ void keysDownCallback(int key, int x, int y) {
 
 void keysUpCallback(int key, int x, int y) {
 	Rocket* rocket = Rocket::getInstance();
-	rocket->MoveRocket(key, x, y);
+	rocket->MarkKeyUp(key, x, y);
 }
 
 void moveCallback() {

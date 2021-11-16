@@ -9,6 +9,7 @@
 #include <GL/freeglut.h>
 #include <GLFW/glfw3.h>
 
+
 void displayMatrix(glm::mat4 matrix) {
 	for (int ii = 0; ii < 4; ii++)
 	{
@@ -69,6 +70,28 @@ Game::Game(int initial_pos_x, int initial_pos_y) :
 	setInitPosY(initial_pos_y);
 	maxX = width / 2;
 	maxY = height / 2;
+
+	//// Triunghiul de sus
+	//775.f, 160.f, 0.f, 1.f,
+	//825.f, 160.f, 0.f, 1.f,
+	//800.f, 185.f, 0.f, 1.f,
+
+	//// Triunghiul de jos
+	//775.f, 100.f, 0.f, 1.f,
+	//825.f, 100.f, 0.f, 1.f,
+	//800.f, 165.f, 0.f, 1.f,
+
+	//// Deptunghiul
+	//790.f, 100.f, 0.f, 1.f,  // stanga jos
+	//810.f, 100.f, 0.f, 1.f, // dr jos
+	//810.f, 175.f, 0.f, 1.f,
+	//790.f, 175.f, 0.f, 1.f,
+
+	//// Triunghiul din varf
+	//790.f, 175.f, 0.f, 1.f,
+	//810.f, 175.f, 0.f, 1.f,
+	//800.f, 210.f, 0.f, 1.f,
+
 
 	InitializeGlew();
 	CreateBackgroundBuffers();
@@ -171,7 +194,10 @@ void Game::FireAnimation() {
 }
 
 void Game::RenderFunction(void) {
-
+	Rocket* rocket = Rocket::getInstance();
+	if (rocket->getIsDead()) {
+		return;
+	}
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 
@@ -196,7 +222,6 @@ void Game::RenderFunction(void) {
 
 	FireAnimation();
 
-	Rocket* rocket = Rocket::getInstance();
 	int posX = rocket->getPositionX();
 	int posY = rocket->getPositionY();
 	glm::mat4 scaleMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(1.f / maxX, 1.f / maxY, 1.0));
@@ -204,6 +229,7 @@ void Game::RenderFunction(void) {
 	glm::mat4 rocketTranslateMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(posX, posY, 0.0));
 
 	glm::mat4 matrix = scaleMatrix * translateMatrix * rocketTranslateMatrix;
+	rocket->setRocketMatrix(matrix);
 
 	myMatrixLocation = glGetUniformLocation(ProgramId, "myMatrix");
 	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &matrix[0][0]);
@@ -220,12 +246,15 @@ void Game::RenderFunction(void) {
 
 	Game::UpdateAsteroids();
 
-	for (auto& asteroid : asteroids) {		
-		glm::mat4 asteroidMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(asteroid->getRadius(), asteroid->getRadius(), 1.0));
+	for (auto& asteroid : asteroids) {				
+		glm::mat4 radiusMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(asteroid->getRadius(), asteroid->getRadius(), 1.0));
 		glm::mat4 animateMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0, - asteroid->getTranslatedDistance(), 0.0)); // controleaza translatia de-a lungul lui Oy
-		asteroidMatrix = backgroundMatrix *  animateMatrix * glm::translate(glm::mat4(1.0f), glm::vec3(asteroid->getX(), asteroid->getY(), 0.0)) * asteroidMatrix;
-		
+		glm::mat4 originalPositionMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(asteroid->getX(), asteroid->getY(), 0.0));
+		glm::mat4 asteroidMatrix = backgroundMatrix *  animateMatrix * originalPositionMatrix * radiusMatrix;
+
 		glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &asteroidMatrix[0][0]);
+
+		asteroid->setAsteroidMatrix(asteroidMatrix);
 		glBindVertexArray(asteroidVao);
 		glDrawArrays(GL_POLYGON, 0, Constants::nrOfVerticesPerCircle);
 	}	
@@ -241,10 +270,28 @@ void Game::RenderFunction(void) {
 		glBindVertexArray(bulletVao);
 		glDrawArrays(GL_POLYGON, 0, Constants::nrOfVerticesPerCircle);
 	}	
+	
+	}
+
+	/*glBindVertexArray(squareVao);
+	matrix = scaleMatrix * translateMatrix;
+	myMatrixLocation = glGetUniformLocation(ProgramId, "myMatrix");
+	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &matrix[0][0]);
+
+	glDrawArrays(GL_POLYGON, 0, 4);*/
+
+	rocket->RocketAsteroidsCollision(asteroids);
 
 	glutPostRedisplay();
 	glFlush();
 }
+
+bool colliding(Rocket rocket, Asteroid asteroid)
+{
+	return false;
+}
+
+
 
 void Game::CreateBackgroundBuffers() {
 
@@ -260,12 +307,10 @@ void Game::CreateBackgroundBuffers() {
 		Vertices[4 * i + 1] = float(rand() % (4 * getHeight()) + 1) - 2 * getHeight();
 		Vertices[4 * i + 2] = 0.f;
 		Vertices[4 * i + 3] = 1.f;
-		//cout << i << " " << Vertices[4 * i] << " " << Vertices[4 * i + 1] << " " << Vertices[4 * i + 2] << " " << Vertices[4 * i + 3] << "\n";
 		Colors[4 * i] = 1.f;
 		Colors[4 * i + 1] = 1.f;
 		Colors[4 * i + 2] = 1.f;
 		Colors[4 * i + 3] = 1.f;
-		//cout << i << " " << Colors[4 * i] << " " << Colors[4 * i + 1] << " " << Colors[4 * i + 2] << " " << Colors[4 * i + 3] << "\n";
 		i++;
 	}
 
@@ -289,28 +334,29 @@ void Game::CreateBackgroundBuffers() {
 }
 
 void Game::CreateRocketBuffers() {
+
+	Rocket* rocket = Rocket::getInstance();
 	GLfloat Vertices[] = {
 		// Triunghiul de sus
-		775.f, 160.f, 0.f, 1.f,
-		825.f, 160.f, 0.f, 1.f,
-		800.f, 185.f, 0.f, 1.f,
+		rocket->topWingsTriangle.left[0], rocket->topWingsTriangle.left[1], 0.f, 1.f,
+		rocket->topWingsTriangle.right[0], rocket->topWingsTriangle.right[1], 0.f, 1.f,
+		rocket->topWingsTriangle.top[0], rocket->topWingsTriangle.top[1], 0.f, 1.f,
 
 		// Triunghiul de jos
-		775.f, 100.f, 0.f, 1.f,
-		825.f, 100.f, 0.f, 1.f,
-		800.f, 165.f, 0.f, 1.f,
+		rocket->bottomWingsTriangle.left[0], rocket->bottomWingsTriangle.left[1], 0.f, 1.f,
+		rocket->bottomWingsTriangle.right[0], rocket->bottomWingsTriangle.right[1], 0.f, 1.f,
+		rocket->bottomWingsTriangle.top[0], rocket->bottomWingsTriangle.top[1], 0.f, 1.f,
 
-		// Deptunghiul
-		790.f, 100.f, 0.f, 1.f,  // stanga jos
-		810.f, 100.f, 0.f, 1.f, // dr jos
-		810.f, 175.f, 0.f, 1.f,
-		790.f, 175.f, 0.f, 1.f,
+		// Dreptunghiul
+		rocket->body.bottomLeft[0], rocket->body.bottomLeft[1], 0.f, 1.f, 
+		rocket->body.bottomRight[0], rocket->body.bottomRight[1], 0.f, 1.f,
+		rocket->body.topRight[0], rocket->body.topRight[1], 0.f, 1.f,
+		rocket->body.topLeft[0], rocket->body.topLeft[1], 0.f, 1.f,
 
 		// Triunghiul din varf
-		790.f, 175.f, 0.f, 1.f,
-		810.f, 175.f, 0.f, 1.f,
-		800.f, 210.f, 0.f, 1.f,
-
+		rocket->frontTriangle.left[0], rocket->frontTriangle.left[1], 0.f, 1.f,
+		rocket->frontTriangle.right[0], rocket->frontTriangle.right[1], 0.f, 1.f,
+		rocket->frontTriangle.top[0], rocket->frontTriangle.top[1], 0.f, 1.f,
 		// Focul portocaliu
 		790.f, 100.f, 0.f, 1.f,
 		810.f, 100.f, 0.f, 1.f,
@@ -381,6 +427,37 @@ void Game::CreateRocketBuffers() {
 	glBufferData(GL_ARRAY_BUFFER, sizeof(Colors), Colors, GL_STATIC_DRAW);
 	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
 	glEnableVertexAttribArray(1);
+
+
+	GLfloat Square[] = {
+		400.f, 000.f, 0.f, 1.f, // st jos
+		800.f, 000.f, 0.f, 1.f, // dr jos
+		800.f, 200.f, 0.f, 1.f, // dr sus,
+		400.f, 200.f, 0.f, 1.f // st sus
+	};
+
+	GLfloat SquareColors[] = {
+		1.f, 0.f, 1.f, 0.f,
+		1.f, 0.f, 1.f, 0.f,
+		1.f, 0.f, 1.f, 0.f,
+		1.f, 0.f, 1.f, 0.f,
+	};
+
+	glGenBuffers(1, &squareVbo);
+	glBindBuffer(GL_ARRAY_BUFFER, squareVbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(Square), Square, GL_STATIC_DRAW);
+
+	glGenVertexArrays(1, &squareVbo);
+	glBindVertexArray(squareVao);
+
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(0);
+
+	glGenBuffers(1, &squareColorBufferId);
+	glBindBuffer(GL_ARRAY_BUFFER, squareColorBufferId);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(SquareColors), SquareColors, GL_STATIC_DRAW);
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(1);
 }
 
 void Game::CreateAsteroidBuffers() {
@@ -388,7 +465,8 @@ void Game::CreateAsteroidBuffers() {
 	GLfloat Vertices[1000];
 	GLfloat Colors[1000];
 	for (int k = 0; k < Constants::nrOfVerticesPerCircle; k++) {
-		int theta = Constants::TWO_PI * k / Constants::nrOfVerticesPerCircle;
+		float theta = Constants::TWO_PI * k / Constants::nrOfVerticesPerCircle;
+		cout << "angle " << float(Constants::TWO_PI * float(k)) / float(Constants::nrOfVerticesPerCircle) << "\n";
 		float x = cos(theta);
 		float y = sin(theta);
 		// varfurile corespunzatoare cercului
@@ -396,6 +474,7 @@ void Game::CreateAsteroidBuffers() {
 		Vertices[4 * k + 1] = y;
 		Vertices[4 * k + 2] = 0.0f;
 		Vertices[4 * k + 3] = 1.0f;
+		cout << 4*k << " " << Vertices[4 * k] << " " << Vertices[4 * k + 1] << " " << Vertices[4 * k + 2] << " " << Vertices[4 * k + 3] << "\n";
 
 		Colors[4 * k] = 1.0f;
 		Colors[4 * k + 1] = 0.0f;

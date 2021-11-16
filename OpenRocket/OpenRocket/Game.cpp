@@ -3,7 +3,8 @@
 #include "helpers.h"
 #include "Constants.h"
 #include "Asteroid.h"
-
+#include "SOIL.h"
+#include "Rocket.h"
 #include <GL/glew.h>
 #include <GL/freeglut.h>
 
@@ -13,7 +14,6 @@ void Game::move(void)
 		float translatedDistance = asteroid->getTranslatedDistance();
 		asteroid->setTranslatedDistance(translatedDistance + Constants::asteroidMovingUnit);
 	}
-	glutPostRedisplay();
 }
 void Game::mouseHandler(int button, int state, int x, int y)
 {
@@ -50,28 +50,6 @@ Game::Game(int initial_pos_x, int initial_pos_y) :
 	maxX = width / 2;
 	maxY = height / 2;
 
-	//// Triunghiul de sus
-	//775.f, 160.f, 0.f, 1.f,
-	//825.f, 160.f, 0.f, 1.f,
-	//800.f, 185.f, 0.f, 1.f,
-
-	//// Triunghiul de jos
-	//775.f, 100.f, 0.f, 1.f,
-	//825.f, 100.f, 0.f, 1.f,
-	//800.f, 165.f, 0.f, 1.f,
-
-	//// Deptunghiul
-	//790.f, 100.f, 0.f, 1.f,  // stanga jos
-	//810.f, 100.f, 0.f, 1.f, // dr jos
-	//810.f, 175.f, 0.f, 1.f,
-	//790.f, 175.f, 0.f, 1.f,
-
-	//// Triunghiul din varf
-	//790.f, 175.f, 0.f, 1.f,
-	//810.f, 175.f, 0.f, 1.f,
-	//800.f, 210.f, 0.f, 1.f,
-
-
 	InitializeGlew();
 	CreateBackgroundBuffers();
 	CreateRocketBuffers();
@@ -93,6 +71,7 @@ void Game::InitializeGlew() {
 
 void Game::CreateShaders(const char* vertShader, const char* fragShader) {
 	ProgramId = LoadShaders(vertShader, fragShader);
+	TextureProgramId = LoadShaders("Texturare_Shader.vert", "Texturare_Shader.frag");
 	glUseProgram(ProgramId);
 }
 
@@ -126,6 +105,7 @@ void Game::InitializeGame(const char* vertShader, const char* fragShader) {
 	myMatrix = resizeMatrix * matrTransl;
 
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	LoadTexture(texture, "blueAsteroid.png");
 }
 
 void Game::FireAnimation() {
@@ -156,12 +136,12 @@ void Game::FireAnimation() {
 	float rightSideX = 775 + 50.f + fireSides;
 	float rightSideY = 85.f - fireSides;
 	float yellowTail = 70.f + fireTail;
-	glNamedBufferSubData(rocketVbo, 15 * 4 * sizeof(GLfloat), sizeof(GLfloat), &rightSideX);
-	glNamedBufferSubData(rocketVbo, (15 * 4 + 1) * sizeof(GLfloat), sizeof(GLfloat), &rightSideY);
-	glNamedBufferSubData(rocketVbo, 16 * 4 * sizeof(GLfloat) + 1 * sizeof(GLfloat), sizeof(GLfloat), &orangeTail);
-	glNamedBufferSubData(rocketVbo, 17 * 4 * sizeof(GLfloat), sizeof(GLfloat), &leftSideX);
-	glNamedBufferSubData(rocketVbo, (17 * 4 + 1) * sizeof(GLfloat), sizeof(GLfloat), &leftSideY);
-	glNamedBufferSubData(rocketVbo, 21 * 4 * sizeof(GLfloat) + 1 * sizeof(GLfloat), sizeof(GLfloat), &yellowTail);
+	glNamedBufferSubData(rocketVbo, 15 * 7 * sizeof(GLfloat), sizeof(GLfloat), &rightSideX);
+	glNamedBufferSubData(rocketVbo, (15 * 7 + 1) * sizeof(GLfloat), sizeof(GLfloat), &rightSideY);
+	glNamedBufferSubData(rocketVbo, (16 * 7 + 1) * sizeof(GLfloat), sizeof(GLfloat), &orangeTail);
+	glNamedBufferSubData(rocketVbo, 17 * 7 * sizeof(GLfloat), sizeof(GLfloat), &leftSideX);
+	glNamedBufferSubData(rocketVbo, (17 * 7 + 1) * sizeof(GLfloat), sizeof(GLfloat), &leftSideY);
+	glNamedBufferSubData(rocketVbo, (21 * 7 + 1) * sizeof(GLfloat), sizeof(GLfloat), &yellowTail);
 }
 
 void Game::RenderFunction(void) {
@@ -172,6 +152,7 @@ void Game::RenderFunction(void) {
 	if (rotationAngle > 360.f) {
 		rotationAngle = 0.0f;
 	}
+	glUseProgram(ProgramId);
 
 	rotationAngle += rotationSpeed;
 
@@ -182,7 +163,6 @@ void Game::RenderFunction(void) {
 
 	myMatrixLocation = glGetUniformLocation(ProgramId, "myMatrix");
 	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &backgroundMatrix[0][0]);
- 
 	glPointSize(2.0);
 	glBindVertexArray(backgroundVao);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, backgroundEbo);
@@ -212,21 +192,27 @@ void Game::RenderFunction(void) {
 	glDrawArrays(GL_POLYGON, 13, 5);
 	glDrawArrays(GL_POLYGON, 18, 5);	
 
+	
+	
 	Game::UpdateAsteroids();
+	glUseProgram(TextureProgramId);
+	myMatrixLocation = glGetUniformLocation(TextureProgramId, "myMatrix");
+	
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, texture);
 	for (auto& asteroid : asteroids) {
 
-		
 		glm::mat4 asteroidMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(asteroid->getRadius(), asteroid->getRadius(), 1.0));
 		glm::mat4 animateMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0, - asteroid->getTranslatedDistance(), 0.0)); // controleaza translatia de-a lungul lui Oy
 		backgroundMatrix = backgroundScaleMatrix * backgroundTranslateMatrix;
 		asteroidMatrix = backgroundMatrix *  animateMatrix * glm::translate(glm::mat4(1.0f), glm::vec3(asteroid->getX(), asteroid->getY(), 0.0)) * asteroidMatrix;
 		asteroid->setAsteroidMatrix(asteroidMatrix);
-
 		glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &asteroidMatrix[0][0]);
 		glBindVertexArray(asteroidVao);
 		glDrawArrays(GL_POLYGON, 0, Constants::nrOfVerticesPerCircle);
 	
 	}
+	glDisable(GL_TEXTURE_2D);
 
 	rocket->RocketAsteroidsCollision(asteroids);
 	glutPostRedisplay();
@@ -237,9 +223,6 @@ bool colliding(Rocket rocket, Asteroid asteroid)
 {
 	return false;
 }
-
-
-
 void Game::CreateBackgroundBuffers() {
 
 	GLfloat Vertices[10000];
@@ -285,140 +268,113 @@ void Game::CreateRocketBuffers() {
 	Rocket* rocket = Rocket::getInstance();
 	GLfloat Vertices[] = {
 		// Triunghiul de sus
-		rocket->topWingsTriangle.left[0], rocket->topWingsTriangle.left[1], 0.f, 1.f,
-		rocket->topWingsTriangle.right[0], rocket->topWingsTriangle.right[1], 0.f, 1.f,
-		rocket->topWingsTriangle.top[0], rocket->topWingsTriangle.top[1], 0.f, 1.f,
+		rocket->topWingsTriangle.left[0], rocket->topWingsTriangle.left[1], 0.f, 1.f,           1.0f, 0.0f, 0.0f,
+		rocket->topWingsTriangle.right[0], rocket->topWingsTriangle.right[1], 0.f, 1.f,         1.0f, 0.0f, 0.0f,
+		rocket->topWingsTriangle.top[0], rocket->topWingsTriangle.top[1], 0.f, 1.f,             1.0f, 0.0f, 0.0f,
 
 		// Triunghiul de jos
-		rocket->bottomWingsTriangle.left[0], rocket->bottomWingsTriangle.left[1], 0.f, 1.f,
-		rocket->bottomWingsTriangle.right[0], rocket->bottomWingsTriangle.right[1], 0.f, 1.f,
-		rocket->bottomWingsTriangle.top[0], rocket->bottomWingsTriangle.top[1], 0.f, 1.f,
+		rocket->bottomWingsTriangle.left[0], rocket->bottomWingsTriangle.left[1], 0.f, 1.f,       1.0f, 0.0f, 0.0f,
+		rocket->bottomWingsTriangle.right[0], rocket->bottomWingsTriangle.right[1], 0.f, 1.f,     1.0f, 0.0f, 0.0f,
+		rocket->bottomWingsTriangle.top[0], rocket->bottomWingsTriangle.top[1], 0.f, 1.f,         1.0f, 0.0f, 0.0f,
 
 		// Dreptunghiul
-		rocket->body.bottomLeft[0], rocket->body.bottomLeft[1], 0.f, 1.f, 
-		rocket->body.bottomRight[0], rocket->body.bottomRight[1], 0.f, 1.f,
-		rocket->body.topRight[0], rocket->body.topRight[1], 0.f, 1.f,
-		rocket->body.topLeft[0], rocket->body.topLeft[1], 0.f, 1.f,
+		rocket->body.bottomLeft[0], rocket->body.bottomLeft[1], 0.f, 1.f,                         0.8f, 0.5f, 0.2f,
+		rocket->body.bottomRight[0], rocket->body.bottomRight[1], 0.f, 1.f,                       0.8f, 0.5f, 0.2f,
+		rocket->body.topRight[0], rocket->body.topRight[1], 0.f, 1.f,                             0.8f, 0.5f, 0.2f,
+		rocket->body.topLeft[0], rocket->body.topLeft[1], 0.f, 1.f,                               0.8f, 0.5f, 0.2f,
 
 		// Triunghiul din varf
-		rocket->frontTriangle.left[0], rocket->frontTriangle.left[1], 0.f, 1.f,
-		rocket->frontTriangle.right[0], rocket->frontTriangle.right[1], 0.f, 1.f,
-		rocket->frontTriangle.top[0], rocket->frontTriangle.top[1], 0.f, 1.f,
+		rocket->frontTriangle.left[0], rocket->frontTriangle.left[1], 0.f, 1.f,                 1.0f, 1.0f, 1.0f,
+		rocket->frontTriangle.right[0], rocket->frontTriangle.right[1], 0.f, 1.f,               1.0f, 1.0f, 1.0f,
+		rocket->frontTriangle.top[0], rocket->frontTriangle.top[1], 0.f, 1.f,                   1.0f, 1.0f, 1.0f,
+	
 		// Focul portocaliu
-		775 + 15.f, 100.f, 0.f, 1.f,
-		775 + 35.f, 100.f, 0.f, 1.f,
-		775 + 50.f, 85.f, 0.f, 1.f, // dreapta
-		775 + 25.f, 50.f, 0.f, 1.f, // varful de jos
-		775 + 0.f, 85.f, 0.f, 1.f, // stanga
+		775 + 15.f, 100.f, 0.f, 1.f,                         1.f, 0.25f, 0.0f,
+		775 + 35.f, 100.f, 0.f, 1.f,                         1.f, 0.25f, 0.0f,
+		775 + 50.f, 85.f, 0.f, 1.f,                          1.f, 0.25f, 0.0f,
+		775 + 25.f, 50.f, 0.f, 1.f,                          1.f, 0.25f, 0.0f,
+		775 + 0.f, 85.f, 0.f, 1.f,                           1.f, 0.25f, 0.0f,
 
 		// Focul galben
-		775 + 15.f, 100.f, 0.f, 1.f,
-		775 + 35.f, 100.f, 0.f, 1.f,
-		775 + 40.f, 90.f, 0.f, 1.f,
-		775 + 25.f, 70.f, 0.f, 1.f, // varful de jos
-		775 + 10.f, 90.f, 0.f, 1.f,
-
+		775 + 15.f, 100.f, 0.f, 1.f,                         1.0f, 0.8f, 0.0f,
+		775 + 35.f, 100.f, 0.f, 1.f,                         1.0f, 0.8f, 0.0f,
+		775 + 40.f, 90.f, 0.f, 1.f,                          1.0f, 0.8f, 0.0f,
+		775 + 25.f, 70.f, 0.f, 1.f,                          1.0f, 0.8f, 0.0f,
+		775 + 10.f, 90.f, 0.f, 1.f,                          1.0f, 0.8f, 0.0f,
 	};
 
-	GLfloat Colors[] = {
-		// Triunghiul de sus
-		1.0f, 0.0f, 0.0f, 0.f,
-		1.0f, 0.0f, 0.0f, 0.f,
-		1.0f, 0.0f, 0.0f, 0.f,
-
-		// Triunghiul de jos
-		1.0f, 0.0f, 0.0f, 0.f,
-		1.0f, 0.0f, 0.0f, 0.f,
-		1.0f, 0.0f, 0.0f, 0.f,
-
-		// Dreptunghiul
-		0.8f, 0.5f, 0.2f, 0.f,
-		0.8f, 0.5f, 0.2f, 0.f,
-		0.8f, 0.5f, 0.2f, 0.f,
-		0.8f, 0.5f, 0.2f, 0.f,
-
-		// Triunghiul din varf
-		1.0f, 1.0f, 1.0f, 0.f,
-		1.0f, 1.0f, 1.0f, 0.f,
-		1.0f, 1.0f, 1.0f, 0.f,
-
-		// Focul portocaliu
-		1.f, 0.25f, 0.0f, 1.0f,
-		1.f, 0.25f, 0.0f, 1.0f,
-		1.f, 0.25f, 0.0f, 1.0f,
-		1.f, 0.25f, 0.0f, 1.0f,
-		1.f, 0.25f, 0.0f, 1.0f,
-
-		// Focul galben
-		1.0f, 0.8f, 0.0f, 1.0f,
-		1.0f, 0.8f, 0.0f, 1.0f,
-		1.0f, 0.8f, 0.0f, 1.0f,
-		1.0f, 0.8f, 0.0f, 1.0f,
-		1.0f, 0.8f, 0.0f, 1.0f
-	};
-
-	int verticesCount = sizeof(Vertices) / sizeof(GLfloat);
-
-	glGenBuffers(1, &rocketVbo);
-	glBindBuffer(GL_ARRAY_BUFFER, rocketVbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(Vertices), Vertices, GL_STATIC_DRAW);
-
+	// se creeaza un VAO (Vertex Array Object) - util cand se utilizeaza mai multe VBO
 	glGenVertexArrays(1, &rocketVao);
+	// se creeaza un buffer nou (atribute)
+	glGenBuffers(1, &rocketVbo);
+	
+	// legarea VAO 
 	glBindVertexArray(rocketVao);
 
-	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
-	glEnableVertexAttribArray(0);
+	// legarea buffer-ului "Array"
+	glBindBuffer(GL_ARRAY_BUFFER, rocketVbo);
+	// punctele sunt "copiate" in bufferul curent
+	glBufferData(GL_ARRAY_BUFFER, sizeof(Vertices), Vertices, GL_STATIC_DRAW);
 
-	glGenBuffers(1, &rocketColorBufferId);
-	glBindBuffer(GL_ARRAY_BUFFER, rocketColorBufferId);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(Colors), Colors, GL_STATIC_DRAW);
-	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
+	// se activeaza lucrul cu atribute; atributul 0 = pozitie
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(GLfloat), (GLvoid*)0);
+
+	// se activeaza lucrul cu atribute; atributul 1 = culoare
 	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(GLfloat), (GLvoid*)(4 * sizeof(GLfloat)));
+
 }
 void Game::CreateAsteroidBuffers() {
 
 	GLfloat Vertices[1000];
-	GLfloat Colors[1000];
 	for (int k = 0; k < Constants::nrOfVerticesPerCircle; k++) {
 		float theta = Constants::TWO_PI * k / Constants::nrOfVerticesPerCircle;
-		cout << "angle " << float(Constants::TWO_PI * float(k)) / float(Constants::nrOfVerticesPerCircle) << "\n";
+		//cout << "angle " << float(Constants::TWO_PI * float(k)) / float(Constants::nrOfVerticesPerCircle) << "\n";
 		float x = cos(theta);
 		float y = sin(theta);
 		Asteroid::circleCenter = { 0.0f, 0.0f, 0.0f, 1.0f };
 		Asteroid::circlePoint = { cos(theta), sin(theta), 0.0f, 1.0f };
 		// varfurile corespunzatoare cercului
-		Vertices[4 * k] = x;
-		Vertices[4 * k + 1] = y;
-		Vertices[4 * k + 2] = 0.0f;
-		Vertices[4 * k + 3] = 1.0f;
-		cout << 4*k << " " << Vertices[4 * k] << " " << Vertices[4 * k + 1] << " " << Vertices[4 * k + 2] << " " << Vertices[4 * k + 3] << "\n";
+		Vertices[9 * k] = x;
+		Vertices[9 * k + 1] = y;
+		Vertices[9 * k + 2] = 0.0f;
+		Vertices[9 * k + 3] = 1.0f;
+		//cout << 4*k << " " << Vertices[4 * k] << " " << Vertices[4 * k + 1] << " " << Vertices[4 * k + 2] << " " << Vertices[4 * k + 3] << "\n";
 
-		Colors[4 * k] = 1.0f;
-		Colors[4 * k + 1] = 0.0f;
-		Colors[4 * k + 2] = 0.0f;
-		Colors[4 * k + 3] = 1.0f;
+		Vertices[9 * k + 4] = 1.0f;
+		Vertices[9 * k + 5] = 0.0f;
+		Vertices[9 * k + 6] = 0.0f;
+
+		cout << (float)k / 18 << " ";
+		Vertices[9 * k + 7] = (sin(theta) + 1) / 2;
+		Vertices[9 * k + 8] = (cos(theta) + 1)/ 2;
 	}
-	for (int i = 0; i < Constants::nrOfVerticesPerCircle * 4 - 4; i+=4) {
-		//cout << Vertices[i] << " " << Vertices[i + 1] << " " << Vertices[i + 2] << " " << Vertices[i + 3] << "\n";
-	}
-	int verticesCount = sizeof(Vertices) / sizeof(GLfloat);
-
-	glGenBuffers(1, &asteroidVbo);
-	glBindBuffer(GL_ARRAY_BUFFER, asteroidVbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(Vertices), Vertices, GL_STATIC_DRAW);
-
+	
+	// se creeaza un VAO (Vertex Array Object) - util cand se utilizeaza mai multe VBO
 	glGenVertexArrays(1, &asteroidVao);
+	// se creeaza un buffer nou (atribute)
+	glGenBuffers(1, &asteroidVbo);
+
+	// legarea VAO 
 	glBindVertexArray(asteroidVao);
 
-	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
+	// legarea buffer-ului "Array"
+	glBindBuffer(GL_ARRAY_BUFFER, asteroidVbo);
+	// punctele sunt "copiate" in bufferul curent
+	glBufferData(GL_ARRAY_BUFFER, sizeof(Vertices), Vertices, GL_STATIC_DRAW);
+
+	// se activeaza lucrul cu atribute; atributul 0 = pozitie
 	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), (GLvoid*)0);
 
-	glGenBuffers(1, &asteroidColorBufferId);
-	glBindBuffer(GL_ARRAY_BUFFER, asteroidColorBufferId);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(Colors), Colors, GL_STATIC_DRAW);
-	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
+	// se activeaza lucrul cu atribute; atributul 1 = culoare
 	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), (GLvoid*)(4 * sizeof(GLfloat)));
 
+	// se activeaza lucrul cu atribute; atributul 2 = coordonate de texturare
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), (GLvoid*)(7 * sizeof(GLfloat)));
 }
 void Game::UpdateAsteroids() {
 	auto end = std::remove_if(asteroids.begin(),
@@ -462,4 +418,22 @@ void Game::GenerateAsteroids(int nrOfAsteroids) {
 	for (int i = 0; i < nrOfAsteroids; i++) {
 		this->asteroids.push_back(Game::GenerateSingleAsteroid());
 	}
+}
+void Game::LoadTexture(GLuint &texture, const char* imageName)
+{
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	int width, height;
+	unsigned char* image = SOIL_load_image(imageName, &width, &height, 0, SOIL_LOAD_RGB);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+	glGenerateMipmap(GL_TEXTURE_2D);
+
+	SOIL_free_image_data(image);
+	glBindTexture(GL_TEXTURE_2D, 0);
 }

@@ -2,8 +2,6 @@
 
 #include <GL/glew.h>
 #include <GL/freeglut.h>
-#include "Rocket.h"
-
 #include <vector>
 #include <algorithm>
 #include <string>
@@ -15,6 +13,8 @@
 #include "Asteroid.h"
 
 using namespace std;
+
+static GLuint texture;
 
 class Game {
 private:
@@ -33,6 +33,7 @@ private:
 	GLfloat RocketVertices[1000];
 	GLuint rocketVao;
 	GLuint rocketVbo;
+	GLuint rocketEbo;
 	GLuint rocketColorBufferId;
 	glm::mat4 rocketMatrix = glm::mat4(1.0f);
 	glm::mat4 rocketScaleMatrix = glm::mat4(1.0f);
@@ -50,12 +51,15 @@ private:
 
 	GLuint asteroidVao;
 	GLuint asteroidVbo;
+	GLuint asteroidEbo;
 	GLuint asteroidColorBufferId;
 
 	int width;
 	int height;
+	int codCol;
 
 	GLuint ProgramId;
+	GLuint TextureProgramId;
 
 	int nrOfStars;
 
@@ -114,4 +118,5 @@ public:
 	void mouseHandler(int, int, int, int);
 	void FireAnimation();
 	void RocketAsteroidCollision();
+	void LoadTexture(GLuint&, const char*);
 };

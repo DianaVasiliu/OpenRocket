@@ -204,6 +204,7 @@ void Rocket::RocketAsteroidsCollision(vector<Asteroid*> asteroids)
 
 
 		bool condition1 = dist(currentCenter, currentFrontTriangle.left, currentFrontTriangle.right) < radius;
+		cout << dist(currentCenter, currentFrontTriangle.left, currentFrontTriangle.right) << "\n";
 		bool condition2 = dist(currentCenter, currentFrontTriangle.top, currentFrontTriangle.right) < radius;
 		bool condition3 = dist(currentCenter, currentFrontTriangle.top, currentFrontTriangle.left) < radius;
 

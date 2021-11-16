@@ -52,6 +52,10 @@ private:
 	GLuint asteroidVbo;
 	GLuint asteroidColorBufferId;
 
+	GLuint squareVao;
+	GLuint squareVbo;
+	GLuint squareColorBufferId;
+
 	int width;
 	int height;
 

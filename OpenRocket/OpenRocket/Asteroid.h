@@ -20,6 +20,7 @@ private:
 	float radius;
 	float translatedDistance;
 	string currentZone;
+
 public:
 	Asteroid(float, int, glm::vec4, glm::vec4);
 	bool isInViewport();

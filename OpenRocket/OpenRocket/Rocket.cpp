@@ -36,23 +36,24 @@ void Rocket::MoveRight() {
 		positionX += moveAmount;
 	}
 }
+
 void Rocket::MoveLeft() {
 	if (positionX - moveAmount > -boundsOffsetX) {
 		positionX -= moveAmount;
 	}
 }
+
 void Rocket::MoveUp() {
 	if (positionY + moveAmount < Constants::maxY - boundsOffsetY) {
 		positionY += moveAmount;
 	}
 }
+
 void Rocket::MoveDown() {
 	if (positionY - moveAmount > -boundsOffsetY) {
 		positionY -= moveAmount;
 	}
 }
-
-
 
 void Rocket::MarkKeyDown(int key, int x, int y) {
 	if (key == GLUT_KEY_RIGHT) {

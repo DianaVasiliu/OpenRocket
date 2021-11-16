@@ -7,8 +7,7 @@
 #include <GL/glew.h>
 #include <GL/freeglut.h>
 
-void displayMatrix(glm::mat4 matrix)
-{
+void displayMatrix(glm::mat4 matrix) {
 	for (int ii = 0; ii < 4; ii++)
 	{
 		for (int jj = 0; jj < 4; jj++)
@@ -19,16 +18,17 @@ void displayMatrix(glm::mat4 matrix)
 
 };
 
-void Game::move(void)
-{
+void Game::move(void) {
 	for (auto& asteroid : asteroids) {
 		float translatedDistance = asteroid->getTranslatedDistance();
 		asteroid->setTranslatedDistance(translatedDistance + Constants::asteroidMovingUnit);
 	}
+
 	glutPostRedisplay();
 }
-void Game::mouseHandler(int button, int state, int x, int y)
-{
+
+void Game::mouseHandler(int button, int state, int x, int y) {
+
 	switch (button) {
 	case GLUT_LEFT_BUTTON:
 		glutIdleFunc(moveCallback);
@@ -37,6 +37,7 @@ void Game::mouseHandler(int button, int state, int x, int y)
 		break;
 	}
 }
+
 Game* Game::instance = nullptr;
 
 Game* Game::getInstance() {
@@ -104,11 +105,10 @@ void Game::DestroyBackgroundVBO(void) {
 	glDeleteBuffers(1, &backgroundVbo);
 
 	glBindVertexArray(0);
-	//glDeleteVertexArrays(1, &VaoId);
 }
 
 void Game::InitializeGame(const char* vertShader, const char* fragShader) {
-	CreateShaders("04_03_Shader.vert", "04_03_Shader.frag");
+	CreateShaders(vertShader, fragShader);
 
 	resizeMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(1.f / maxX, 1.f / maxY, 1.0));
 	matrTransl = glm::translate(glm::mat4(1.0f), glm::vec3(-maxX, -maxY, 0.0));
@@ -202,9 +202,8 @@ void Game::RenderFunction(void) {
 	glDrawArrays(GL_POLYGON, 18, 5);	
 
 	Game::UpdateAsteroids();
-	for (auto& asteroid : asteroids) {
 
-		
+	for (auto& asteroid : asteroids) {		
 		glm::mat4 asteroidMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(asteroid->getRadius(), asteroid->getRadius(), 1.0));
 		glm::mat4 animateMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0, - asteroid->getTranslatedDistance(), 0.0)); // controleaza translatia de-a lungul lui Oy
 		backgroundMatrix = backgroundScaleMatrix * backgroundTranslateMatrix;
@@ -353,6 +352,7 @@ void Game::CreateRocketBuffers() {
 	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
 	glEnableVertexAttribArray(1);
 }
+
 void Game::CreateAsteroidBuffers() {
 
 	GLfloat Vertices[1000];
@@ -392,8 +392,8 @@ void Game::CreateAsteroidBuffers() {
 	glBufferData(GL_ARRAY_BUFFER, sizeof(Colors), Colors, GL_STATIC_DRAW);
 	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
 	glEnableVertexAttribArray(1);
-
 }
+
 void Game::UpdateAsteroids() {
 	auto end = std::remove_if(asteroids.begin(),
 		asteroids.end(),
@@ -413,6 +413,7 @@ void Game::UpdateAsteroids() {
 	}
 	Game::GenerateAsteroids(count);
 }
+
 float Game::generateOffset(float leftOffset, float rightOffset, static const string offsetType) {
 	float offset;
 	bool collides = true;
@@ -427,11 +428,13 @@ float Game::generateOffset(float leftOffset, float rightOffset, static const str
 	}
 	return offset;
 }
+
 Asteroid* Game::GenerateSingleAsteroid() {
 	float x_offset = Game::generateOffset(0, 2 * Constants::width, Constants::xCoord);
 	float y_offset = Game::generateOffset(2 * Constants::height, 4 * Constants::height, Constants::yCoord);
 	return new Asteroid(40.0, 20, glm::vec4(x_offset, y_offset, 0.0f, 1.0f), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
 }
+
 void Game::GenerateAsteroids(int nrOfAsteroids) {
 	for (int i = 0; i < nrOfAsteroids; i++) {
 		this->asteroids.push_back(Game::GenerateSingleAsteroid());

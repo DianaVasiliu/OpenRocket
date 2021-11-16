@@ -5,6 +5,8 @@
 #include "Rocket.h"
 
 #include <vector>
+#include <algorithm>
+#include <string>
 #include "glm/glm/glm.hpp"  
 #include "glm/glm/ext/matrix_transform.hpp"
 #include "glm/glm/gtx/transform.hpp"
@@ -104,10 +106,10 @@ public:
 
 	void InitializeGame(const char* vertShader, const char* fragShader);
 	void RenderFunction(void);
-	void GenerateAsteroids();
+	void GenerateAsteroids(int nrOfAsteroids);
 	Asteroid* GenerateSingleAsteroid();
 	void UpdateAsteroids();
-	float generateXOffset();
+	float generateOffset(float, float, static const string);
 	void move();
 	void mouseHandler(int, int, int, int);
 	void FireAnimation();

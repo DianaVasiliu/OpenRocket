@@ -421,7 +421,7 @@ void Game::CreateAsteroidBuffers() {
 	GLfloat Vertices[1000];
 	GLfloat Colors[1000];
 	for (int k = 0; k < Constants::nrOfVerticesPerCircle; k++) {
-		int theta = Constants::TWO_PI * float(k) / float(Constants::nrOfVerticesPerCircle);
+		float theta = Constants::TWO_PI * k / Constants::nrOfVerticesPerCircle;
 		cout << "angle " << float(Constants::TWO_PI * float(k)) / float(Constants::nrOfVerticesPerCircle) << "\n";
 		float x = cos(theta);
 		float y = sin(theta);

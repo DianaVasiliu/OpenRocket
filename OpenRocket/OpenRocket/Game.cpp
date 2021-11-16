@@ -165,7 +165,10 @@ void Game::FireAnimation() {
 }
 
 void Game::RenderFunction(void) {
-
+	Rocket* rocket = Rocket::getInstance();
+	if (rocket->getIsDead()) {
+		return;
+	}
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 
@@ -190,7 +193,6 @@ void Game::RenderFunction(void) {
 
 	FireAnimation();
 
-	Rocket* rocket = Rocket::getInstance();
 	int posX = rocket->getPositionX();
 	int posY = rocket->getPositionY();
 	glm::mat4 scaleMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(1.f / maxX, 1.f / maxY, 1.0));
@@ -216,17 +218,28 @@ void Game::RenderFunction(void) {
 	for (auto& asteroid : asteroids) {
 
 		
-		glm::mat4 asteroidMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(asteroid->getRadius(), asteroid->getRadius(), 1.0));
+		glm::mat4 radiusMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(asteroid->getRadius(), asteroid->getRadius(), 1.0));
 		glm::mat4 animateMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0, - asteroid->getTranslatedDistance(), 0.0)); // controleaza translatia de-a lungul lui Oy
+		glm::mat4 originalPositionMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(asteroid->getX(), asteroid->getY(), 0.0));
 		backgroundMatrix = backgroundScaleMatrix * backgroundTranslateMatrix;
-		asteroidMatrix = backgroundMatrix *  animateMatrix * glm::translate(glm::mat4(1.0f), glm::vec3(asteroid->getX(), asteroid->getY(), 0.0)) * asteroidMatrix;
-		asteroid->setAsteroidMatrix(asteroidMatrix);
+		glm::mat4 asteroidMatrix = backgroundMatrix *  animateMatrix * originalPositionMatrix * radiusMatrix;
+
 
 		glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &asteroidMatrix[0][0]);
+
+		asteroid->setAsteroidMatrix(asteroidMatrix);
 		glBindVertexArray(asteroidVao);
 		glDrawArrays(GL_POLYGON, 0, Constants::nrOfVerticesPerCircle);
 	
 	}
+
+	/*glBindVertexArray(squareVao);
+	matrix = scaleMatrix * translateMatrix;
+	myMatrixLocation = glGetUniformLocation(ProgramId, "myMatrix");
+	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &matrix[0][0]);
+
+	glDrawArrays(GL_POLYGON, 0, 4);*/
+
 
 	rocket->RocketAsteroidsCollision(asteroids);
 	glutPostRedisplay();
@@ -252,12 +265,10 @@ void Game::CreateBackgroundBuffers() {
 		Vertices[4 * i + 1] = float(rand() % (4 * getHeight()) + 1) - 2 * getHeight();
 		Vertices[4 * i + 2] = 0.f;
 		Vertices[4 * i + 3] = 1.f;
-		//cout << i << " " << Vertices[4 * i] << " " << Vertices[4 * i + 1] << " " << Vertices[4 * i + 2] << " " << Vertices[4 * i + 3] << "\n";
 		Colors[4 * i] = 1.f;
 		Colors[4 * i + 1] = 1.f;
 		Colors[4 * i + 2] = 1.f;
 		Colors[4 * i + 3] = 1.f;
-		//cout << i << " " << Colors[4 * i] << " " << Colors[4 * i + 1] << " " << Colors[4 * i + 2] << " " << Colors[4 * i + 3] << "\n";
 		i++;
 	}
 
@@ -374,6 +385,37 @@ void Game::CreateRocketBuffers() {
 	glBufferData(GL_ARRAY_BUFFER, sizeof(Colors), Colors, GL_STATIC_DRAW);
 	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
 	glEnableVertexAttribArray(1);
+
+
+	GLfloat Square[] = {
+		400.f, 000.f, 0.f, 1.f, // st jos
+		800.f, 000.f, 0.f, 1.f, // dr jos
+		800.f, 200.f, 0.f, 1.f, // dr sus,
+		400.f, 200.f, 0.f, 1.f // st sus
+	};
+
+	GLfloat SquareColors[] = {
+		1.f, 0.f, 1.f, 0.f,
+		1.f, 0.f, 1.f, 0.f,
+		1.f, 0.f, 1.f, 0.f,
+		1.f, 0.f, 1.f, 0.f,
+	};
+
+	glGenBuffers(1, &squareVbo);
+	glBindBuffer(GL_ARRAY_BUFFER, squareVbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(Square), Square, GL_STATIC_DRAW);
+
+	glGenVertexArrays(1, &squareVbo);
+	glBindVertexArray(squareVao);
+
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(0);
+
+	glGenBuffers(1, &squareColorBufferId);
+	glBindBuffer(GL_ARRAY_BUFFER, squareColorBufferId);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(SquareColors), SquareColors, GL_STATIC_DRAW);
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(1);
 }
 void Game::CreateAsteroidBuffers() {
 
@@ -384,8 +426,6 @@ void Game::CreateAsteroidBuffers() {
 		cout << "angle " << float(Constants::TWO_PI * float(k)) / float(Constants::nrOfVerticesPerCircle) << "\n";
 		float x = cos(theta);
 		float y = sin(theta);
-		Asteroid::circleCenter = { 0.0f, 0.0f, 0.0f, 1.0f };
-		Asteroid::circlePoint = { cos(theta), sin(theta), 0.0f, 1.0f };
 		// varfurile corespunzatoare cercului
 		Vertices[4 * k] = x;
 		Vertices[4 * k + 1] = y;

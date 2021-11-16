@@ -20,6 +20,7 @@ private:
 	float radius;
 	float translatedDistance;
 	string currentZone;
+
 public:
 	glm::mat4 asteroidMatrix;
 	static glm::vec4 circlePoint;

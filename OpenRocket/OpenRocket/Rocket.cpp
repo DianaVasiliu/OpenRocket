@@ -65,25 +65,30 @@ void Rocket::MarkKeyUp(int key, int x, int y) {
 void Rocket::MoveRight() {
 	if (positionX + moveAmount < Constants::maxX - boundsOffsetX) {
 		positionX += moveAmount;
+		bulletStartX += moveAmount;
 	}
 }
+
 void Rocket::MoveLeft() {
 	if (positionX - moveAmount > -boundsOffsetX) {
 		positionX -= moveAmount;
+		bulletStartX -= moveAmount;
 	}
 }
+
 void Rocket::MoveUp() {
 	if (positionY + moveAmount < Constants::maxY - boundsOffsetY) {
 		positionY += moveAmount;
+		bulletStartY += moveAmount / 2;
 	}
 }
+
 void Rocket::MoveDown() {
 	if (positionY - moveAmount > -boundsOffsetY) {
 		positionY -= moveAmount;
+		bulletStartY -= moveAmount / 2;
 	}
 }
-
-
 
 void Rocket::MarkKeyDown(int key, int x, int y) {
 	if (key == GLUT_KEY_RIGHT) { // tocmai s-a apasat tasta RIGHT
@@ -95,7 +100,7 @@ void Rocket::MarkKeyDown(int key, int x, int y) {
 		}
 		else if (downIsPressed) 
 		{
-			MoveUp();			 // daca tasta Down era deja apasata, mut racheta si in jos
+			MoveDown(); // daca tasta Down era deja apasata, mut racheta si in jos
 		}
 	}
 	if (key == GLUT_KEY_LEFT) {

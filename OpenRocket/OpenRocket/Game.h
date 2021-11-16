@@ -13,6 +13,7 @@
 #include "glm/glm/gtc/type_ptr.hpp"
 #include "Constants.h"
 #include "Asteroid.h"
+#include "Bullet.h"
 
 using namespace std;
 
@@ -52,6 +53,11 @@ private:
 	GLuint asteroidVbo;
 	GLuint asteroidColorBufferId;
 
+	GLuint bulletVao;
+	GLuint bulletVbo;
+	GLuint bulletColorBufferId;
+	double lastBulletTime = 0.0f;
+  
 	GLuint squareVao;
 	GLuint squareVbo;
 	GLuint squareColorBufferId;
@@ -85,6 +91,7 @@ public:
 	Game(int initial_pos_x, int initial_pos_y);
 	~Game();
 	vector<Asteroid*> asteroids;
+	vector<Bullet*> bullets;
 	static Game* getInstance();
 
 	void setHeight(int h) { height = h; }
@@ -99,23 +106,31 @@ public:
 
 	void CreateBackgroundBuffers();
 	void CreateRocketBuffers();
+	void CreateAsteroidBuffers();
+	void CreateBulletBuffers();
+
 	void moveRocket(int key, int x, int y);
 
-	void CreateAsteroidBuffers();
 	void InitializeGlew();
 	void CreateShaders(const char* vertShader, const char* fragShader);
 	void DestroyShaders(void);
 	void Cleanup(void);
-	void DestroyBackgroundVBO(void);
+	void DestroyVBO(void);
 
 	void InitializeGame(const char* vertShader, const char* fragShader);
 	void RenderFunction(void);
+
 	void GenerateAsteroids(int nrOfAsteroids);
 	Asteroid* GenerateSingleAsteroid();
 	void UpdateAsteroids();
 	float generateOffset(float, float, static const string);
+
 	void move();
 	void mouseHandler(int, int, int, int);
 	void FireAnimation();
+
+	void UpdateBullets();
+	void GenerateBullet();
+  
 	void RocketAsteroidCollision();
 };

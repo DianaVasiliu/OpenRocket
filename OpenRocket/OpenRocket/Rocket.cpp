@@ -153,19 +153,22 @@ float dist(glm::vec4 pt, glm::vec4 p1, glm::vec4 p2)
 
 	// See if this represents one of the segment's
 	// end points or a point in the middle.
+	glm::vec4 closest;
 	if (t < 0)
 	{
+		closest = p1;
 		dx = pt[0] - p1[0];
 		dy = pt[1] - p1[1];
 	}
 	else if (t > 1)
 	{
+		closest = p2;
 		dx = pt[0] - p2[0];
 		dy = pt[1] - p2[1];
 	}
 	else
 	{
-		glm::vec4 closest = { p1[0] + t * dx, p1[1] + t * dy, 0.f, 1.f };
+		closest = { p1[0] + t * dx, p1[1] + t * dy, 0.f, 1.f };
 		dx = pt[0] - closest[0];
 		dy = pt[1] - closest[1];
 	}
@@ -176,35 +179,39 @@ float dist(glm::vec4 pt, glm::vec4 p1, glm::vec4 p2)
 
 
 void Rocket::CalculateCurrentPositions() {
-	currentFrontTriangle.left = frontTriangle.left * rocketMatrix;
-	currentFrontTriangle.right = frontTriangle.right * rocketMatrix;
-	currentFrontTriangle.top = frontTriangle.top * rocketMatrix;
 
-	currentTopWingsTriangle.left = topWingsTriangle.left * rocketMatrix;
-	currentTopWingsTriangle.right = topWingsTriangle.right * rocketMatrix;
-	currentTopWingsTriangle.top = topWingsTriangle.top * rocketMatrix;
+	currentFrontTriangle.left = rocketMatrix * frontTriangle.left;
+	currentFrontTriangle.right = rocketMatrix * frontTriangle.right;
+	currentFrontTriangle.top = rocketMatrix * frontTriangle.top;
 
-	currentBottomWingsTriangle.left = bottomWingsTriangle.left * rocketMatrix;
-	currentBottomWingsTriangle.right = bottomWingsTriangle.right * rocketMatrix;
-	currentBottomWingsTriangle.top = bottomWingsTriangle.top * rocketMatrix;
+	currentTopWingsTriangle.left = rocketMatrix * topWingsTriangle.left;
+	currentTopWingsTriangle.right = rocketMatrix * topWingsTriangle.right;
+	currentTopWingsTriangle.top = rocketMatrix * topWingsTriangle.top;
 
-	currentBody.topLeft = body.topLeft * rocketMatrix;
-	currentBody.topRight = body.topRight * rocketMatrix;
-	currentBody.bottomRight = body.bottomRight * rocketMatrix;
-	currentBody.bottomLeft = body.bottomLeft * rocketMatrix;
+	currentBottomWingsTriangle.left = rocketMatrix * bottomWingsTriangle.left;
+	currentBottomWingsTriangle.right = rocketMatrix * bottomWingsTriangle.right;
+	currentBottomWingsTriangle.top = rocketMatrix * bottomWingsTriangle.top;
+
+	currentBody.topLeft = rocketMatrix * body.topLeft;
+	currentBody.topRight = rocketMatrix * body.topRight;
+	currentBody.bottomRight = rocketMatrix * body.bottomRight;
+	currentBody.bottomLeft = rocketMatrix * body.bottomLeft;
 }
+
 
 void Rocket::RocketAsteroidsCollision(vector<Asteroid*> asteroids) 
 {
 	for (int i = 0; i < int(asteroids.size()); i++) {
-		glm::vec4 currentCenter = Asteroid::circleCenter * asteroids[i]->asteroidMatrix;
-		glm::vec4 currentPoint = Asteroid::circlePoint * asteroids[i]->asteroidMatrix;
+		// For each asteroid calculate the current position of the center and a point on the circle.
+		// For this, I use the initial position of the point and the transform matrix applied to the asteroid.
+		glm::vec4 currentCenter = asteroids[i]->asteroidMatrix * Asteroid::circleCenter;
+		glm::vec4 currentPoint = asteroids[i]->asteroidMatrix * Asteroid::circlePoint;
+		// I then get the current radius of the circle by getting the distance between these points.
 		double radius = sqrt(pow(currentCenter[0] - currentPoint[0], 2) + pow(currentCenter[1] - currentPoint[1], 2));
 		CalculateCurrentPositions();
 
-
+		// I then calculate the distance between each line segment of the rocket and the asteroid.
 		bool condition1 = dist(currentCenter, currentFrontTriangle.left, currentFrontTriangle.right) < radius;
-		cout << dist(currentCenter, currentFrontTriangle.left, currentFrontTriangle.right) << "\n";
 		bool condition2 = dist(currentCenter, currentFrontTriangle.top, currentFrontTriangle.right) < radius;
 		bool condition3 = dist(currentCenter, currentFrontTriangle.top, currentFrontTriangle.left) < radius;
 
@@ -224,13 +231,8 @@ void Rocket::RocketAsteroidsCollision(vector<Asteroid*> asteroids)
 			condition7 || condition8 || condition9 || condition10 || condition11 || condition12 )
 		{
 			cout << "coliziunee\n";
+			isDead = true;
 		}
-		//cout << "dist " << dist(currentCenter, currentFrontTriangle.left, currentFrontTriangle.right) << "\n";
 
-		/*glm::vec4 punct1 = { 0.f, 4.f, 0.f, 1.f };
-		glm::vec4 punct2 = { 1.f, 2.f, 0.f, 1.f };
-		glm::vec4 punct3 = { 5.f, 1.f, 0.f, 1.f };
-
-		cout << "dist " << dist(punct1, punct2, punct3);*/
 	}
 }

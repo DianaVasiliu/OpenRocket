@@ -165,7 +165,10 @@ void Game::FireAnimation() {
 }
 
 void Game::RenderFunction(void) {
-
+	Rocket* rocket = Rocket::getInstance();
+	if (rocket->getIsDead()) {
+		return;
+	}
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 
@@ -190,7 +193,6 @@ void Game::RenderFunction(void) {
 
 	FireAnimation();
 
-	Rocket* rocket = Rocket::getInstance();
 	int posX = rocket->getPositionX();
 	int posY = rocket->getPositionY();
 	glm::mat4 scaleMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(1.f / maxX, 1.f / maxY, 1.0));
@@ -216,25 +218,27 @@ void Game::RenderFunction(void) {
 	for (auto& asteroid : asteroids) {
 
 		
-		glm::mat4 asteroidMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(asteroid->getRadius(), asteroid->getRadius(), 1.0));
+		glm::mat4 radiusMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(asteroid->getRadius(), asteroid->getRadius(), 1.0));
 		glm::mat4 animateMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0, - asteroid->getTranslatedDistance(), 0.0)); // controleaza translatia de-a lungul lui Oy
+		glm::mat4 originalPositionMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(asteroid->getX(), asteroid->getY(), 0.0));
 		backgroundMatrix = backgroundScaleMatrix * backgroundTranslateMatrix;
-		asteroidMatrix = backgroundMatrix *  animateMatrix * glm::translate(glm::mat4(1.0f), glm::vec3(asteroid->getX(), asteroid->getY(), 0.0)) * asteroidMatrix;
-		asteroid->setAsteroidMatrix(asteroidMatrix);
+		glm::mat4 asteroidMatrix = backgroundMatrix *  animateMatrix * originalPositionMatrix * radiusMatrix;
+
 
 		glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &asteroidMatrix[0][0]);
+
+		asteroid->setAsteroidMatrix(asteroidMatrix);
 		glBindVertexArray(asteroidVao);
 		glDrawArrays(GL_POLYGON, 0, Constants::nrOfVerticesPerCircle);
 	
 	}
 
-	glBindVertexArray(squareVao);
+	/*glBindVertexArray(squareVao);
 	matrix = scaleMatrix * translateMatrix;
 	myMatrixLocation = glGetUniformLocation(ProgramId, "myMatrix");
 	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &matrix[0][0]);
-	asteroids[0]->setAsteroidMatrix(matrix);
 
-	glDrawArrays(GL_POLYGON, 0, 4);
+	glDrawArrays(GL_POLYGON, 0, 4);*/
 
 
 	rocket->RocketAsteroidsCollision(asteroids);
@@ -389,9 +393,6 @@ void Game::CreateRocketBuffers() {
 		800.f, 200.f, 0.f, 1.f, // dr sus,
 		400.f, 200.f, 0.f, 1.f // st sus
 	};
-
-	Asteroid::circleCenter = { 800.0f, 100.0f, 0.0f, 1.0f };
-	Asteroid::circlePoint = { 800.f + 200.f, 100.f, 0.0f, 1.0f };
 
 	GLfloat SquareColors[] = {
 		1.f, 0.f, 1.f, 0.f,

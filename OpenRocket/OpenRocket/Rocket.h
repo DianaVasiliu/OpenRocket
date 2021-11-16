@@ -62,6 +62,7 @@ public:
     static Rocket* getInstance();
 
 	glm::mat4 getRocketMatrix() { return rocketMatrix; }
+	float getIsDead() { return isDead; }
 	float getPositionX() { return positionX; }
 	float getPositionY() { return positionY; }
 

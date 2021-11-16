@@ -24,6 +24,11 @@ void Game::move(void) {
 		asteroid->setTranslatedDistance(translatedDistance + Constants::asteroidMovingUnit);
 	}
 
+	for (auto& bullet : bullets) {
+		float bulletY = bullet->getY();
+		bullet->setY(bulletY + Constants::bulletSpeed);
+	}
+
 	glutPostRedisplay();
 }
 
@@ -67,6 +72,7 @@ Game::Game(int initial_pos_x, int initial_pos_y) :
 	CreateBackgroundBuffers();
 	CreateRocketBuffers();
 	CreateAsteroidBuffers();
+	CreateBulletBuffers();
 	GenerateAsteroids(Constants::nrOfAsteroidsPerFrame);
 }
 
@@ -78,6 +84,7 @@ void Game::InitializeGlew() {
 	glutDisplayFunc(renderCallback);
 	glutSpecialFunc(keysDownCallback);
 	glutSpecialUpFunc(keysUpCallback);
+	glutKeyboardFunc(processNormalKeys);
 	glutMouseFunc(mouseCallback);
 	glutCloseFunc(cleanupCallback); 
 }
@@ -93,16 +100,22 @@ void Game::DestroyShaders(void) {
 
 void Game::Cleanup(void) {
 	DestroyShaders();
-	DestroyBackgroundVBO();
+	DestroyVBO();
 }
 
-void Game::DestroyBackgroundVBO(void) {
+void Game::DestroyVBO(void) {
 	glDisableVertexAttribArray(1);
 	glDisableVertexAttribArray(0);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glDeleteBuffers(1, &backgroundColorBufferId);
 	glDeleteBuffers(1, &backgroundVbo);
+	glDeleteBuffers(1, &rocketColorBufferId);
+	glDeleteBuffers(1, &rocketVbo);
+	glDeleteBuffers(1, &asteroidColorBufferId);
+	glDeleteBuffers(1, &asteroidVbo);
+	glDeleteBuffers(1, &bulletColorBufferId);
+	glDeleteBuffers(1, &bulletVbo);
 
 	glBindVertexArray(0);
 }
@@ -197,7 +210,6 @@ void Game::RenderFunction(void) {
 	glDrawArrays(GL_TRIANGLES, 3, 3);
 	glDrawArrays(GL_POLYGON, 6, 4);
 	glDrawArrays(GL_TRIANGLES, 10, 3);
-
 	glDrawArrays(GL_POLYGON, 13, 5);
 	glDrawArrays(GL_POLYGON, 18, 5);	
 
@@ -212,16 +224,31 @@ void Game::RenderFunction(void) {
 		glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &asteroidMatrix[0][0]);
 		glBindVertexArray(asteroidVao);
 		glDrawArrays(GL_POLYGON, 0, Constants::nrOfVerticesPerCircle);
-	
-	}
+	}	
+
+	Game::UpdateBullets();
+
+	for (auto& bullet : bullets) {
+		glm::mat4 bulletMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(bullet->getRadius(), bullet->getRadius(), 1.0f));
+		glm::mat4 animateMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0, bullet->getY(), 0.0));
+		backgroundMatrix = backgroundScaleMatrix * backgroundTranslateMatrix;
+		bulletMatrix = backgroundMatrix * animateMatrix * glm::translate(glm::mat4(1.0f), glm::vec3(bullet->getX(), bullet->getY(), 0.0)) * bulletMatrix;
+
+		glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &bulletMatrix[0][0]);
+		glBindVertexArray(bulletVao);
+		glDrawArrays(GL_POLYGON, 0, Constants::nrOfVerticesPerCircle);
+	}	
+
 	glutPostRedisplay();
 	glFlush();
 }
 
 void Game::CreateBackgroundBuffers() {
 
-	GLfloat Vertices[10000];
-	GLfloat Colors[10000];
+	const int nrOfVertices = 1000 * 5;
+
+	GLfloat Vertices[nrOfVertices];
+	GLfloat Colors[nrOfVertices];
 
 	srand(time(NULL));
 	int i = 0;
@@ -282,18 +309,18 @@ void Game::CreateRocketBuffers() {
 		800.f, 210.f, 0.f, 1.f,
 
 		// Focul portocaliu
-		775 + 15.f, 100.f, 0.f, 1.f,
-		775 + 35.f, 100.f, 0.f, 1.f,
-		775 + 50.f, 85.f, 0.f, 1.f, // dreapta
-		775 + 25.f, 50.f, 0.f, 1.f, // varful de jos
-		775 + 0.f, 85.f, 0.f, 1.f, // stanga
+		790.f, 100.f, 0.f, 1.f,
+		810.f, 100.f, 0.f, 1.f,
+		825.f, 85.f, 0.f, 1.f, // dreapta
+		800.f, 50.f, 0.f, 1.f, // varful de jos
+		775.f, 85.f, 0.f, 1.f, // stanga
 
 		// Focul galben
-		775 + 15.f, 100.f, 0.f, 1.f,
-		775 + 35.f, 100.f, 0.f, 1.f,
-		775 + 40.f, 90.f, 0.f, 1.f,
-		775 + 25.f, 70.f, 0.f, 1.f, // varful de jos
-		775 + 10.f, 90.f, 0.f, 1.f,
+		790.f, 100.f, 0.f, 1.f,
+		810.f, 100.f, 0.f, 1.f,
+		815.f, 90.f, 0.f, 1.f,
+		800.f, 70.f, 0.f, 1.f, // varful de jos
+		785.f, 90.f, 0.f, 1.f,
 
 	};
 
@@ -439,4 +466,63 @@ void Game::GenerateAsteroids(int nrOfAsteroids) {
 	for (int i = 0; i < nrOfAsteroids; i++) {
 		this->asteroids.push_back(Game::GenerateSingleAsteroid());
 	}
+}
+
+void Game::CreateBulletBuffers() {
+
+	GLfloat Vertices[1000];
+	GLfloat Colors[1000];
+	for (int k = 0; k < Constants::nrOfVerticesPerCircle; k++) {
+		int theta = Constants::TWO_PI * k / Constants::nrOfVerticesPerCircle;
+		float x = Constants::bulletRadius * cos(theta);
+		float y = Constants::bulletRadius * sin(theta);
+
+		Vertices[4 * k] = x;
+		Vertices[4 * k + 1] = y;
+		Vertices[4 * k + 2] = 0.0f;
+		Vertices[4 * k + 3] = 1.0f;
+
+		Colors[4 * k] = 0.0f;
+		Colors[4 * k + 1] = 1.0f;
+		Colors[4 * k + 2] = 0.0f;
+		Colors[4 * k + 3] = 1.0f;
+	}
+
+	int verticesCount = sizeof(Vertices) / sizeof(GLfloat);
+
+	glGenBuffers(1, &bulletVbo);
+	glBindBuffer(GL_ARRAY_BUFFER, bulletVbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(Vertices), Vertices, GL_STATIC_DRAW);
+
+	glGenVertexArrays(1, &bulletVao);
+	glBindVertexArray(bulletVao);
+
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(0);
+
+	glGenBuffers(1, &bulletColorBufferId);
+	glBindBuffer(GL_ARRAY_BUFFER, bulletColorBufferId);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(Colors), Colors, GL_STATIC_DRAW);
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(1);
+}
+
+void Game::GenerateBullet() {
+	Rocket* rocket = Rocket::getInstance();
+	if (bullets.size() < Constants::nrOfBulletsPerFrame) {
+		bullets.push_back(new Bullet(Constants::bulletRadius, rocket->getBulletStartX(), rocket->getBulletStartY()));
+	}
+	else {
+		cout << "Fire Cooldown\n";
+	}
+}
+
+void Game::UpdateBullets() {
+	auto end = std::remove_if(bullets.begin(),
+		bullets.end(),
+		[](Bullet* const& i) {
+			return i->aboveViewport();
+		});
+
+	bullets.erase(end, bullets.end());
 }

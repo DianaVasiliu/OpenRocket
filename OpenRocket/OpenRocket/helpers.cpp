@@ -1,4 +1,5 @@
 #include "helpers.h"
+#include <iostream>
 
 void cleanupCallback() {
 	Game* game = Game::getInstance();
@@ -28,4 +29,17 @@ void moveCallback() {
 void mouseCallback(int button, int state, int x, int y) {
 	Game* game = Game::getInstance();
 	game->mouseHandler(button, state, x, y);
+}
+
+void processNormalKeys(unsigned char key, int x, int y)
+{
+	Game * game = Game::getInstance();
+	switch (key) {
+	case 'm':	
+		game->GenerateBullet();
+		break;
+	default:
+		break;
+
+	}
 }

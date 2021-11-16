@@ -22,6 +22,10 @@ private:
 	float positionY = 0;
 	float boundsOffsetX = 800;
 	float boundsOffsetY = 135;
+	const float initialOffsetX = 800;
+	const float initialOffsetY = 100;
+	float bulletStartX = 800;
+	float bulletStartY = 100;
 
 	bool rightIsPressed = false;
 	bool leftIsPressed = false;
@@ -46,7 +50,22 @@ public:
 	float getPositionX() { return positionX; }
 	float getPositionY() { return positionY; }
 
-	void Update();
+	float getBulletStartX() const {
+		return bulletStartX;
+	}
+
+	float getBulletStartY() const {
+		return bulletStartY;
+	}
+
+	void setBulletStartX(float x) {
+		bulletStartX = x;
+	}
+
+	void setBulletStartY(float y) {
+		bulletStartY = y;
+	}
+
 	void MoveRocket(int key, int x, int y);
 	void MarkKeyDown(int key, int x, int y);
 	void MoveRight();

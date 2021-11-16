@@ -3,6 +3,7 @@
 #include <GL/glew.h>
 #include <GL/freeglut.h>
 #include <vector>
+#include <string>
 
 #include "glm/glm/glm.hpp"  
 #include "glm/glm/ext/matrix_transform.hpp"
@@ -18,6 +19,7 @@ private:
 	int nrOfVertices;
 	float radius;
 	float translatedDistance;
+	string currentZone;
 public:
 	glm::mat4 asteroidMatrix;
 	static glm::vec4 circlePoint;
@@ -27,7 +29,12 @@ public:
 	~Asteroid() { };
 
 	bool isInViewport();
+	void updateState();
+	bool inLowerHalf();
 	bool belowViewport();
+  
+	string getCurrentZone();
+	void setCurrentZone(string);
 
 	float getX();
 	float getY();
@@ -36,6 +43,7 @@ public:
 	glm::mat4 getAsteroidMatrix() { return asteroidMatrix; }
 
 	void setX(float);
+	float getRealY();
 	void setY(float);
 	void setTranslatedDistance(float);
 	void setAsteroidMatrix(glm::mat4 matrix) { asteroidMatrix = matrix; }

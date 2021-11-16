@@ -76,7 +76,7 @@ Game::Game(int initial_pos_x, int initial_pos_y) :
 	CreateBackgroundBuffers();
 	CreateRocketBuffers();
 	CreateAsteroidBuffers();
-	GenerateAsteroids();
+	GenerateAsteroids(Constants::nrOfAsteroidsPerFrame);
 }
 
 void Game::InitializeGlew() {
@@ -182,7 +182,7 @@ void Game::RenderFunction(void) {
 
 	myMatrixLocation = glGetUniformLocation(ProgramId, "myMatrix");
 	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &backgroundMatrix[0][0]);
-
+ 
 	glPointSize(2.0);
 	glBindVertexArray(backgroundVao);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, backgroundEbo);
@@ -218,6 +218,7 @@ void Game::RenderFunction(void) {
 		
 		glm::mat4 asteroidMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(asteroid->getRadius(), asteroid->getRadius(), 1.0));
 		glm::mat4 animateMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0, - asteroid->getTranslatedDistance(), 0.0)); // controleaza translatia de-a lungul lui Oy
+		backgroundMatrix = backgroundScaleMatrix * backgroundTranslateMatrix;
 		asteroidMatrix = backgroundMatrix *  animateMatrix * glm::translate(glm::mat4(1.0f), glm::vec3(asteroid->getX(), asteroid->getY(), 0.0)) * asteroidMatrix;
 		asteroid->setAsteroidMatrix(asteroidMatrix);
 
@@ -427,59 +428,38 @@ void Game::UpdateAsteroids() {
 	});
 
 	asteroids.erase(end, asteroids.end());
-
-	if (static_cast<int>(asteroids.size()) < Constants::nrOfAsteroidsPerFrame) {
-		int nrToGenerate = Constants::nrOfAsteroidsPerFrame - asteroids.size();
-		for (int k = 0; k < nrToGenerate; k++) {
-			this->asteroids.push_back(Game::GenerateSingleAsteroid());
+	int count = 0;
+	for (auto& asteroid : asteroids) {
+		string previousState = asteroid->getCurrentZone();
+		asteroid->updateState();
+		string newState = asteroid->getCurrentZone();
+		if (previousState != newState) {
+			count++;
 		}
 	}
+	Game::GenerateAsteroids(count);
 }
-float Game::generateXOffset() {
-	float maxDistance = 0, leftOffset = 0, rightOffset = 2 * Constants::width; 
-	if (static_cast<int>(asteroids.size()) == 0) {
-		leftOffset += Constants::distanceBetweenAsteroids;
-		rightOffset -= Constants::distanceBetweenAsteroids;
-		return leftOffset + rand() % ((int)(rightOffset - leftOffset + 1));
+float Game::generateOffset(float leftOffset, float rightOffset, static const string offsetType) {
+	float offset;
+	bool collides = true;
+	srand(time(NULL));
+	while (collides) {
+		offset = leftOffset + rand() % ((int)(rightOffset - leftOffset + 1));
+		collides = false;
+		for (int i = 0; i < static_cast<int>(asteroids.size()) - 1 && !collides; i++) {
+			if (abs(offset - (offsetType == Constants::xCoord ? asteroids[i]->getX() : asteroids[i]->getRealY())) < Constants::distanceBetweenAsteroids)
+				collides = true;
+		} 
 	}
-	int i = 0;
-	float leftAsteroid = asteroids[0]->getX(), rightAsteroid = asteroids[static_cast<int>(asteroids.size()) - 1]->getX();
-	while(i < static_cast<int>(asteroids.size()) - 1) {
-		leftAsteroid = min(leftAsteroid, asteroids[i]->getX());
-		rightAsteroid = max(rightAsteroid, asteroids[i]->getX());
-		if (maxDistance < abs(asteroids[i]->getX() - asteroids[i + 1]->getX())) {
-			maxDistance = abs(asteroids[i]->getX() - asteroids[i + 1]->getX());
-			rightOffset = asteroids[i + 1]->getX();
-			leftOffset = asteroids[i]->getX();
-			if (leftOffset > rightOffset) {
-				swap(leftOffset, rightOffset);
-			}
-		}
-		i++;
-	}
-	leftAsteroid = min(leftAsteroid, asteroids[i]->getX());
-	rightAsteroid = max(rightAsteroid, asteroids[i]->getX());
-	if (maxDistance < leftAsteroid) {
-		maxDistance = leftAsteroid;
-		rightOffset = leftAsteroid;
-		leftOffset = 0;
-	}
-	if (maxDistance < 2 * Constants::width - rightAsteroid) {
-		maxDistance = 2 * Constants::width - rightAsteroid;
-		rightOffset = 2 * Constants::width;
-		leftOffset = rightAsteroid;
-	}
-	return leftOffset + rand() % ((int)(rightOffset - leftOffset + 1));
+	return offset;
 }
 Asteroid* Game::GenerateSingleAsteroid() {
-	// generam random coordonata x
-	float y_offset = 2 * Constants::height + rand() % (3 * Constants::height - 2 * Constants::height + 1);
-	float x_offset = Game::generateXOffset();
+	float x_offset = Game::generateOffset(0, 2 * Constants::width, Constants::xCoord);
+	float y_offset = Game::generateOffset(2 * Constants::height, 4 * Constants::height, Constants::yCoord);
 	return new Asteroid(40.0, 20, glm::vec4(x_offset, y_offset, 0.0f, 1.0f), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
 }
-void Game::GenerateAsteroids() {
-	// generam un numar de asteroizi initial intr-o pozitie care nu se afla in view-ul nostru
-	for (int i = 0; i < Constants::nrOfAsteroidsPerFrame; i++) {
+void Game::GenerateAsteroids(int nrOfAsteroids) {
+	for (int i = 0; i < nrOfAsteroids; i++) {
 		this->asteroids.push_back(Game::GenerateSingleAsteroid());
 	}
 }

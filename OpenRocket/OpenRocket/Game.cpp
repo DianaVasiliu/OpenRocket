@@ -3,9 +3,11 @@
 #include "helpers.h"
 #include "Constants.h"
 #include "Asteroid.h"
+#include <ctime>
 
 #include <GL/glew.h>
 #include <GL/freeglut.h>
+#include <GLFW/glfw3.h>
 
 void displayMatrix(glm::mat4 matrix) {
 	for (int ii = 0; ii < 4; ii++)
@@ -86,7 +88,8 @@ void Game::InitializeGlew() {
 	glutSpecialUpFunc(keysUpCallback);
 	glutKeyboardFunc(processNormalKeys);
 	glutMouseFunc(mouseCallback);
-	glutCloseFunc(cleanupCallback); 
+	glutCloseFunc(cleanupCallback);
+	glfwInit();
 }
 
 void Game::CreateShaders(const char* vertShader, const char* fragShader) {
@@ -213,12 +216,13 @@ void Game::RenderFunction(void) {
 	glDrawArrays(GL_POLYGON, 13, 5);
 	glDrawArrays(GL_POLYGON, 18, 5);	
 
+	backgroundMatrix = backgroundScaleMatrix * backgroundTranslateMatrix;
+
 	Game::UpdateAsteroids();
 
 	for (auto& asteroid : asteroids) {		
 		glm::mat4 asteroidMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(asteroid->getRadius(), asteroid->getRadius(), 1.0));
 		glm::mat4 animateMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0, - asteroid->getTranslatedDistance(), 0.0)); // controleaza translatia de-a lungul lui Oy
-		backgroundMatrix = backgroundScaleMatrix * backgroundTranslateMatrix;
 		asteroidMatrix = backgroundMatrix *  animateMatrix * glm::translate(glm::mat4(1.0f), glm::vec3(asteroid->getX(), asteroid->getY(), 0.0)) * asteroidMatrix;
 		
 		glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &asteroidMatrix[0][0]);
@@ -231,7 +235,6 @@ void Game::RenderFunction(void) {
 	for (auto& bullet : bullets) {
 		glm::mat4 bulletMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(bullet->getRadius(), bullet->getRadius(), 1.0f));
 		glm::mat4 animateMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0, bullet->getY(), 0.0));
-		backgroundMatrix = backgroundScaleMatrix * backgroundTranslateMatrix;
 		bulletMatrix = backgroundMatrix * animateMatrix * glm::translate(glm::mat4(1.0f), glm::vec3(bullet->getX(), bullet->getY(), 0.0)) * bulletMatrix;
 
 		glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &bulletMatrix[0][0]);
@@ -473,7 +476,7 @@ void Game::CreateBulletBuffers() {
 	GLfloat Vertices[1000];
 	GLfloat Colors[1000];
 	for (int k = 0; k < Constants::nrOfVerticesPerCircle; k++) {
-		int theta = Constants::TWO_PI * k / Constants::nrOfVerticesPerCircle;
+		float theta = Constants::TWO_PI * (float)k / (float)Constants::nrOfVerticesPerCircle;
 		float x = Constants::bulletRadius * cos(theta);
 		float y = Constants::bulletRadius * sin(theta);
 
@@ -509,8 +512,16 @@ void Game::CreateBulletBuffers() {
 
 void Game::GenerateBullet() {
 	Rocket* rocket = Rocket::getInstance();
+	double now = glfwGetTime();
+
 	if (bullets.size() < Constants::nrOfBulletsPerFrame) {
-		bullets.push_back(new Bullet(Constants::bulletRadius, rocket->getBulletStartX(), rocket->getBulletStartY()));
+		if (now - lastBulletTime > Constants::bulletSpawnCooldown) {
+			lastBulletTime = glfwGetTime();
+			bullets.push_back(new Bullet(Constants::bulletRadius, rocket->getBulletStartX(), rocket->getBulletStartY()));
+		}
+		else {
+			cout << "Reloading\n";
+		}
 	}
 	else {
 		cout << "Fire Cooldown\n";

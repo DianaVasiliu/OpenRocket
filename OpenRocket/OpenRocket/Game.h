@@ -56,6 +56,7 @@ private:
 	GLuint bulletVao;
 	GLuint bulletVbo;
 	GLuint bulletColorBufferId;
+	double lastBulletTime = 0.0f;
 
 	int width;
 	int height;

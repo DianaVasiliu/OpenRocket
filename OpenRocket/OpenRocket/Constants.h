@@ -24,7 +24,7 @@ public:
     static const std::string RED;
     static const std::string SAFE;
     static const float bulletSpeed;
-    static const float bulletSpawnCooldown;
+    static const double bulletSpawnCooldown;
     static const float bulletRadius;
     static const int nrOfBulletsPerFrame;
 };

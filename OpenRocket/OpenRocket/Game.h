@@ -80,6 +80,7 @@ private:
 	GLuint TextureProgramId;
 
 	int nrOfStars;
+	int score;
 
 	int colorCode;
 	int initPosX;
@@ -116,6 +117,7 @@ public:
 	int getWidth() const { return width; }
 	int getInitPosX() const { return initPosX; }
 	int getInitPosY() const { return initPosY; }
+	int getScore() const { return score; }
 
 	void CreateBackgroundBuffers();
 	void CreateRocketBuffers();

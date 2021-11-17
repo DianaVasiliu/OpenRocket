@@ -15,7 +15,7 @@ To run the application, the following libraries must be installed:
 -   [GLEW](http://glew.sourceforge.net/)
 -   [glm](https://glm.g-truc.net/0.9.9/)
 -   [GLFW](https://www.glfw.org/download)
--   [SOIL](https://moodle.unibuc.ro/pluginfile.php/142721/mod_folder/content/0/SOIL.lib?forcedownload=1)
+-   [SOIL](https://github.com/DianaVasiliu/OpenRocket/tree/master/OpenRocket/OpenRocket/SOIL)
 
 ## Installation steps for Windows and Visual Studio
 
@@ -33,9 +33,9 @@ After downloading the library files:
 
 -   for **FreeGLUT, GLEW and GLFW**: copy all the files to the coresponding directories. For FreeGLUT and GLEW, keep the `GL` folder when copying to `include`
 
--   for **glm**, extract the `zip` in the project folder. Make sure to keep the parent `glm` folder, in which you can find multiple other files and folders.
+-   for **glm**: extract the `zip` in the project folder. Make sure to keep the parent `glm` folder, in which you can find multiple other files and folders.
 
--   for **SOIL**: copy SOIL.lib to the coresponding directory
+-   for **SOIL**: move `SOIL.lib` to the coresponding directory
 
 In Visual Studio, the libraries must be linked to the project.
 
@@ -45,6 +45,6 @@ Go to `Project -> Properties -> Configuration Properties -> Linker -> Input -> A
 -   `glew32.lib`
 -   `opengl32.lib`
 -   `glfw3.lib`
--   `<complete path to VS include folder>\SOIL.lib`
+-   `<complete_path_to_VS_include_folder>\SOIL.lib`
 
 Done!

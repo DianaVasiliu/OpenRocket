@@ -4,23 +4,12 @@
 #include "Rocket.h"
 #include <GL/glew.h>
 #include <GL/freeglut.h>
+#include <GLFW/glfw3.h>
 
 Rocket* Rocket::instance = nullptr;
 
-void displayMatrix(glm::mat4 matrix)
-{
-	//cout << "intra aici";
-	for (int ii = 0; ii < 4; ii++)
-	{
-		for (int jj = 0; jj < 4; jj++)
-			cout << matrix[ii][jj] << "  ";
-		cout << endl;
-	};
-	cout << "\n";
-
-};
-
-Rocket::Rocket() 
+Rocket::Rocket() :
+	remainingLives(Constants::maxLives)
 {
 	frontTriangle.top = { 800.f, 210.f, 0.f, 1.f };
 	frontTriangle.left = { 790.f, 175.f, 0.0f, 1.f };
@@ -91,16 +80,16 @@ void Rocket::MoveDown() {
 }
 
 void Rocket::MarkKeyDown(int key, int x, int y) {
-	if (key == GLUT_KEY_RIGHT) { // tocmai s-a apasat tasta RIGHT
-		rightIsPressed = true;	 // marchez aceasta tasta ca pressed
-		MoveRight();			 // mut racheta catre dreapta
+	if (key == GLUT_KEY_RIGHT) {	// RIGHT just pressed
+		rightIsPressed = true;		// marking the key as pressed
+		MoveRight();				// moving the rocket to the right
 		if (upIsPressed) 
 		{
-			MoveUp();			 // daca tasta Up era deja apasata, mut racheta si in sus
+			MoveUp();				// if UP was already pressed, move the rocket up
 		}
 		else if (downIsPressed) 
 		{
-			MoveDown(); // daca tasta Down era deja apasata, mut racheta si in jos
+			MoveDown();				// if DOWN was already pressed, move the rocket down
 		}
 	}
 	if (key == GLUT_KEY_LEFT) {
@@ -143,17 +132,18 @@ void Rocket::MarkKeyDown(int key, int x, int y) {
 
 float dist(glm::vec4 pt, glm::vec4 p1, glm::vec4 p2)
 {
+	// Calculate the Ox and Oy distances between the 2 points of the line segment.
 	float dx = p2[0] - p1[0];
 	float dy = p2[1] - p1[1];
 	if ((dx == 0) && (dy == 0))
 	{
-		// It's a point not a line segment.
 		dx = pt[0] - p1[0];
 		dy = pt[1] - p1[1];
 		return sqrt(dx * dx + dy * dy);
 	}
 
-	// Calculate the t that minimizes the distance.
+	// t is the relative distance between the point of projection of the point on the line segment.
+	// We calculate the t that minimizez the distance between the point and the line segment.
 	float t = ((pt[0] - p1[0]) * dx + (pt[1] - p1[1]) * dy) / (dx * dx + dy * dy);
 
 	// See if this represents one of the segment's
@@ -178,7 +168,6 @@ float dist(glm::vec4 pt, glm::vec4 p1, glm::vec4 p2)
 		dy = pt[1] - closest[1];
 	}
 
-	//cout << sqrt(dx * dx + dy * dy) << "\n";
 	return sqrt(dx * dx + dy * dy);
 }
 
@@ -235,8 +224,20 @@ void Rocket::RocketAsteroidsCollision(vector<Asteroid*> asteroids)
 		if (condition1 || condition2 || condition3 || condition4 || condition5 || condition6 || 
 			condition7 || condition8 || condition9 || condition10 || condition11 || condition12 )
 		{
-			cout << "coliziunee\n";
-			isDead = true;
+			double now = glfwGetTime();
+
+			if (now - lastCollisionTime > Constants::timeToEscapeAsteroid) {
+				lastCollisionTime = glfwGetTime();
+				remainingLives--;
+				cout << "Lives left: " << remainingLives << "\n";
+			}
+
+			if (remainingLives == 0) {
+				isDead = true;
+
+				Game* game = Game::getInstance();
+				std::cout << "Your score is: " << game->getScore() / 2 << "\n";
+			}
 		}
 
 	}

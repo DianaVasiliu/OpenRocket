@@ -7,7 +7,7 @@ void makeCheckImage(void)
 	int i, j, c;
 	for (i = 0; i < checkImageHeight; i++) {
 		for (j = 0; j < checkImageWidth; j++) {
-			c = ((((i & 0x8) == 0) ^ ((j & 0x8)) == 0)) * 200;
+			c = ((((i & 0x8) == 0) ^ ((j & 0x8) == 0))) * 200;
 
 			checkImage[i][j][0] = (GLubyte)c;
 			checkImage[i][j][1] = (GLubyte)c;

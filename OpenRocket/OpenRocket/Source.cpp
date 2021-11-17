@@ -1,6 +1,5 @@
-#include "loadShaders.h"
+#include <iostream>
 #include "Game.h"
-#include "helpers.h"
 
 using namespace std;
 
@@ -11,6 +10,7 @@ int main(int argc, char* argv[]) {
 
 	Game* game = Game::getInstance();
 	game->InitializeGame();
+	std::cout << "Click anywhere to start a new game\n";
 	game->RenderFunction();
 
 	glutMainLoop();

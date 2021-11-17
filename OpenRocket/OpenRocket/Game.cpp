@@ -9,18 +9,6 @@
 #include <GL/freeglut.h>
 #include <GLFW/glfw3.h>
 
-
-void displayMatrix(glm::mat4 matrix) {
-	for (int ii = 0; ii < 4; ii++)
-	{
-		for (int jj = 0; jj < 4; jj++)
-			cout << matrix[ii][jj] << "  ";
-		cout << endl;
-	};
-	cout << "\n";
-
-};
-
 void Game::move(void) {
 	for (auto& asteroid : asteroids) {
 		float translatedDistance = asteroid->getTranslatedDistance();
@@ -71,29 +59,8 @@ Game::Game(int initial_pos_x, int initial_pos_y) :
 	maxX = width / 2;
 	maxY = height / 2;
 
-	//// Triunghiul de sus
-	//775.f, 160.f, 0.f, 1.f,
-	//825.f, 160.f, 0.f, 1.f,
-	//800.f, 185.f, 0.f, 1.f,
-
-	//// Triunghiul de jos
-	//775.f, 100.f, 0.f, 1.f,
-	//825.f, 100.f, 0.f, 1.f,
-	//800.f, 165.f, 0.f, 1.f,
-
-	//// Deptunghiul
-	//790.f, 100.f, 0.f, 1.f,  // stanga jos
-	//810.f, 100.f, 0.f, 1.f, // dr jos
-	//810.f, 175.f, 0.f, 1.f,
-	//790.f, 175.f, 0.f, 1.f,
-
-	//// Triunghiul din varf
-	//790.f, 175.f, 0.f, 1.f,
-	//810.f, 175.f, 0.f, 1.f,
-	//800.f, 210.f, 0.f, 1.f,
-
-
 	InitializeGlew();
+	CreateHeartBuffers();
 	CreateBackgroundBuffers();
 	CreateRocketBuffers();
 	CreateAsteroidBuffers();
@@ -195,11 +162,15 @@ void Game::FireAnimation() {
 
 void Game::RenderFunction(void) {
 	Rocket* rocket = Rocket::getInstance();
-	if (rocket->getIsDead()) {
-		return;
-	}
+
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
+
+	if (rocket->getIsDead()) {
+		// TODO: render a png with the text GAME OVER
+		//glutSwapBuffers();
+		return;
+	}
 
 	if (rotationAngle > 360.f) {
 		rotationAngle = 0.0f;
@@ -271,25 +242,24 @@ void Game::RenderFunction(void) {
 		glDrawArrays(GL_POLYGON, 0, Constants::nrOfVerticesPerCircle);
 	}	
 
-	/*glBindVertexArray(squareVao);
-	matrix = scaleMatrix * translateMatrix;
-	myMatrixLocation = glGetUniformLocation(ProgramId, "myMatrix");
-	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &matrix[0][0]);
-
-	glDrawArrays(GL_POLYGON, 0, 4);*/
-
 	rocket->RocketAsteroidsCollision(asteroids);
+	
+	glm::mat4 heartMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(4.7f, 4.7f, 1.0f));
+	heartMatrix = backgroundMatrix * heartMatrix;
+
+	glm::mat4 heartTranslateMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(10.0f, 0.0f, 0.0f));
+	for (int i = 0; i < rocket->getRemainingLives(); i++) {
+		if (i != 0) {
+			heartMatrix = heartMatrix * heartTranslateMatrix;
+		}
+		glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &heartMatrix[0][0]);
+		glBindVertexArray(heartVao);
+		glDrawArrays(GL_POLYGON, 0, 14);
+	}
 
 	glutPostRedisplay();
 	glFlush();
 }
-
-bool colliding(Rocket rocket, Asteroid asteroid)
-{
-	return false;
-}
-
-
 
 void Game::CreateBackgroundBuffers() {
 
@@ -464,7 +434,6 @@ void Game::CreateAsteroidBuffers() {
 	GLfloat Colors[1000];
 	for (int k = 0; k < Constants::nrOfVerticesPerCircle; k++) {
 		float theta = Constants::TWO_PI * k / Constants::nrOfVerticesPerCircle;
-		cout << "angle " << float(Constants::TWO_PI * float(k)) / float(Constants::nrOfVerticesPerCircle) << "\n";
 		float x = cos(theta);
 		float y = sin(theta);
 		// varfurile corespunzatoare cercului
@@ -472,16 +441,13 @@ void Game::CreateAsteroidBuffers() {
 		Vertices[4 * k + 1] = y;
 		Vertices[4 * k + 2] = 0.0f;
 		Vertices[4 * k + 3] = 1.0f;
-		cout << 4*k << " " << Vertices[4 * k] << " " << Vertices[4 * k + 1] << " " << Vertices[4 * k + 2] << " " << Vertices[4 * k + 3] << "\n";
 
 		Colors[4 * k] = 1.0f;
 		Colors[4 * k + 1] = 0.0f;
 		Colors[4 * k + 2] = 0.0f;
 		Colors[4 * k + 3] = 1.0f;
 	}
-	for (int i = 0; i < Constants::nrOfVerticesPerCircle * 4 - 4; i+=4) {
-		//cout << Vertices[i] << " " << Vertices[i + 1] << " " << Vertices[i + 2] << " " << Vertices[i + 3] << "\n";
-	}
+
 	int verticesCount = sizeof(Vertices) / sizeof(GLfloat);
 
 	glGenBuffers(1, &asteroidVbo);
@@ -613,4 +579,54 @@ void Game::UpdateBullets() {
 		});
 
 	bullets.erase(end, bullets.end());
+}
+
+void Game::CreateHeartBuffers() {
+	
+	GLfloat Vertices[] = {
+		7.0f, 3.7f, 0.0f, 1.0f,
+		
+		8.0f, 4.5f, 0.0f, 1.0f,
+		9.6f, 6.0f, 0.0f, 1.0f,
+		10.4f, 7.5f, 0.0f, 1.0f,
+		10.0f, 9.0f, 0.0f, 1.0f,
+		8.7f, 9.8f, 0.0f, 1.0f,
+		7.8f, 9.7f, 0.0f, 1.0f,
+		
+		7.0f, 8.9f, 0.0f, 1.0f,
+		
+		6.2f, 9.7f, 0.0f, 1.0f,
+		5.3f, 9.8f, 0.0f, 1.0f,
+		4.0f, 9.0f, 0.0f, 1.0f,
+		3.6f, 7.5f, 0.0f, 1.0f,
+		4.4f, 6.0f, 0.0f, 1.0f,
+		6.0f, 4.5f, 0.0f, 1.0f,
+	};
+
+	const int verticesCount = sizeof(Vertices) / sizeof(GLfloat);
+
+	GLfloat Colors[verticesCount];
+
+	for (int i = 0; i < verticesCount; i += 4) {
+		Colors[i] = 1.0f;
+		Colors[i + 1] = 0.0f;
+		Colors[i + 2] = 0.0f;
+		Colors[i + 3] = 1.0f;
+	}
+
+	glGenBuffers(1, &heartVbo);
+	glBindBuffer(GL_ARRAY_BUFFER, heartVbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(Vertices), Vertices, GL_STATIC_DRAW);
+
+	glGenVertexArrays(1, &heartVao);
+	glBindVertexArray(heartVao);
+
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(0);
+
+	glGenBuffers(1, &heartColorBufferId);
+	glBindBuffer(GL_ARRAY_BUFFER, heartColorBufferId);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(Colors), Colors, GL_STATIC_DRAW);
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(1);
 }

@@ -62,6 +62,10 @@ private:
 	GLuint squareVbo;
 	GLuint squareColorBufferId;
 
+	GLuint heartVao;
+	GLuint heartVbo;
+	GLuint heartColorBufferId;
+
 	int width;
 	int height;
 
@@ -108,6 +112,7 @@ public:
 	void CreateRocketBuffers();
 	void CreateAsteroidBuffers();
 	void CreateBulletBuffers();
+	void CreateHeartBuffers();
 
 	void moveRocket(int key, int x, int y);
 

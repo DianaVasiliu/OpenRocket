@@ -4,10 +4,12 @@
 
 #include <GL/glew.h>
 #include <GL/freeglut.h>
+#include <GLFW/glfw3.h>
 
 Rocket* Rocket::instance = nullptr;
 
-Rocket::Rocket() 
+Rocket::Rocket() :
+	remainingLives(Constants::maxLives)
 {
 	frontTriangle.top = { 800.f, 210.f, 0.f, 1.f };
 	frontTriangle.left = { 790.f, 175.f, 0.0f, 1.f };
@@ -222,8 +224,17 @@ void Rocket::RocketAsteroidsCollision(vector<Asteroid*> asteroids)
 		if (condition1 || condition2 || condition3 || condition4 || condition5 || condition6 || 
 			condition7 || condition8 || condition9 || condition10 || condition11 || condition12 )
 		{
-			cout << "coliziunee\n";
-			isDead = true;
+			double now = glfwGetTime();
+
+			if (now - lastCollisionTime > Constants::timeToEscapeAsteroid) {
+				lastCollisionTime = glfwGetTime();
+				remainingLives--;
+				cout << "Lives left: " << remainingLives << "\n";
+			}
+
+			if (remainingLives == 0) {
+				isDead = true;
+			}
 		}
 
 	}

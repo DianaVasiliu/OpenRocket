@@ -27,4 +27,6 @@ public:
     static const double bulletSpawnCooldown;
     static const float bulletRadius;
     static const int nrOfBulletsPerFrame;
+    static const int maxLives;
+    static const double timeToEscapeAsteroid;
 };

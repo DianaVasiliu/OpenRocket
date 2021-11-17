@@ -146,4 +146,5 @@ public:
   
 	void LoadTexture(GLuint&, const char*);
 	void loadTextures();
+	void BulletAsteroidCollision();
 };

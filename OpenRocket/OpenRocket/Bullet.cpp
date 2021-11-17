@@ -15,6 +15,9 @@ bool Bullet::aboveViewport() {
 	return this->y > Constants::height;
 }
 
+glm::vec4 Bullet::bulletCenter = { 0.0f, 0.0f, 0.0f, 1.0f };
+glm::vec4 Bullet::bulletPoint = { 0.0f, 0.0f, 0.0f, 1.0f };
+
 float Bullet::getRadius() const {
 	return radius;
 }

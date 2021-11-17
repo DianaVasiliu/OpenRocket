@@ -21,7 +21,8 @@ private:
 	float translatedDistance;
 	string currentZone;
 	int textureIndex;
-
+	bool toBeDeleted = false;
+  
 public:
 	glm::mat4 asteroidMatrix;
 	static glm::vec4 circlePoint;
@@ -35,6 +36,7 @@ public:
 	bool inLowerHalf();
 	bool belowViewport();  
 
+	bool getToBeDeleted() const { return toBeDeleted; }
 	float getX() const;
 	float getY() const;
 	float getRadius() const;
@@ -47,6 +49,7 @@ public:
 	void setX(float);
 	void setY(float);
 	void setTranslatedDistance(float);
+	void setToBeDeleted(bool t) { toBeDeleted = t; }
 	void setAsteroidMatrix(glm::mat4);
 	void setCurrentZone(string);
 };

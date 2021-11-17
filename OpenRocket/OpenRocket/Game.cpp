@@ -6,6 +6,7 @@
 #include "SOIL/SOIL.h"
 #include "Rocket.h"
 #include <ctime>
+#include <vector>
 
 #include <GL/glew.h>
 #include <GL/freeglut.h>
@@ -249,12 +250,14 @@ void Game::RenderFunction(void) {
 		glm::mat4 animateMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0, bullet->getY(), 0.0));
 		bulletMatrix = backgroundMatrix * animateMatrix * glm::translate(glm::mat4(1.0f), glm::vec3(bullet->getX(), bullet->getY(), 0.0)) * bulletMatrix;
 
+		bullet->bulletMatrix = bulletMatrix;
 		glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &bulletMatrix[0][0]);
 		glBindVertexArray(bulletVao);
 		glDrawArrays(GL_POLYGON, 0, Constants::nrOfVerticesPerCircle);
 	}	
 
 	rocket->RocketAsteroidsCollision(asteroids);
+	BulletAsteroidCollision();
 	
 	glm::mat4 heartMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(4.7f, 4.7f, 1.0f));
 	heartMatrix = backgroundMatrix * heartMatrix;
@@ -515,6 +518,8 @@ void Game::loadTextures() {
 void Game::CreateBulletBuffers() {
 	GLfloat Vertices[1000];
 	GLfloat Colors[1000];
+	Bullet::bulletCenter = { 0.f, 0.0f, 0.f, 1.f };
+	Bullet::bulletPoint = { Constants::bulletRadius, 0.0f, 0.f, 1.f };
 	for (int k = 0; k < Constants::nrOfVerticesPerCircle; k++) {
 		float theta = Constants::TWO_PI * (float)k / (float)Constants::nrOfVerticesPerCircle;
 		float x = Constants::bulletRadius * cos(theta);
@@ -576,8 +581,50 @@ void Game::UpdateBullets() {
 	bullets.erase(end, bullets.end());
 }
 
+double distance(glm::vec4 p1, glm::vec4 p2) {
+	return sqrt(pow(p1[0] - p2[0], 2) + pow(p1[1] - p2[1], 2));
+}
+
+void Game::BulletAsteroidCollision() {
+	vector<int> eraseAsteroids;
+	vector<int> eraseBullets;
+	for (int i = 0; i < int(bullets.size()); i++) {
+		for (int j = 0; j < int(asteroids.size()); j++) {
+			glm::vec4 currentBulletCenter = bullets[i]->bulletMatrix * Bullet::bulletCenter;
+			glm::vec4 currentBulletPoint = bullets[i]->bulletMatrix * Bullet::bulletPoint;
+
+			glm::vec4 currentAsteroidCenter = asteroids[j]->asteroidMatrix * Asteroid::circleCenter;
+			glm::vec4 currentAsteroidPoint = asteroids[j]->asteroidMatrix * Asteroid::circlePoint;
+
+			double currentBulletRadius = sqrt(pow(currentBulletCenter[0] - currentBulletPoint[0], 2) + pow(currentBulletCenter[1] - currentBulletPoint[1], 2));
+			double currentAsteroidRadius = sqrt(pow(currentAsteroidCenter[0] - currentAsteroidPoint[0], 2) + pow(currentAsteroidCenter[1] - currentAsteroidPoint[1], 2));
+
+			if (distance(currentAsteroidCenter, currentBulletCenter) < currentBulletRadius + currentAsteroidRadius) {
+				bullets[i]->setToBeDeleted(true);
+				asteroids[j]->setToBeDeleted(true);
+			}
+		}
+	}
+
+	auto end1 = std::remove_if(asteroids.begin(),
+		asteroids.end(),
+		[](Asteroid* const& i) {
+		return i->getToBeDeleted();
+	});
+
+	asteroids.erase(end1, asteroids.end());
+
+	auto end2 = std::remove_if(bullets.begin(),
+		bullets.end(),
+		[](Bullet* const& i) {
+		return i->getToBeDeleted();
+	});
+
+	bullets.erase(end2, bullets.end());
+}
+
 void Game::CreateHeartBuffers() {
-	
+  
 	GLfloat Vertices[] = {
 		7.0f, 3.7f, 0.0f, 1.0f,
 		

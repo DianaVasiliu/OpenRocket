@@ -137,7 +137,7 @@ public:
 	void UpdateBullets();
 	void GenerateBullet();
   
-	void RocketAsteroidCollision();
 	void LoadTexture(GLuint&, const char*);
 	void loadTextures();
+	void BulletAsteroidCollision();
 };

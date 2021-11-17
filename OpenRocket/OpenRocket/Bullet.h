@@ -1,4 +1,7 @@
-#pragma once
+#include "glm/glm/glm.hpp"  
+#include "glm/glm/ext/matrix_transform.hpp"
+#include "glm/glm/gtx/transform.hpp"
+#include "glm/glm/gtc/type_ptr.hpp"
 
 class Bullet {
 private:
@@ -6,7 +9,7 @@ private:
 	float translatedDistance;
 	float x;
 	float y;
-
+	bool toBeDeleted = false;
 public:
 	Bullet(float radius, float posX, float posY);
 	~Bullet();
@@ -27,6 +30,8 @@ public:
 		return translatedDistance;
 	}
 
+	bool getToBeDeleted() { return toBeDeleted; }
+
 	void setX(float x) {
 		this->x = x;
 	}
@@ -39,6 +44,10 @@ public:
 		translatedDistance = distance;
 	}
 
-	bool aboveViewport();
+	void setToBeDeleted(bool t) { toBeDeleted = t; }
 
+	bool aboveViewport();
+	static glm::vec4 bulletCenter;
+	static glm::vec4 bulletPoint;
+	glm::mat4 bulletMatrix;
 };

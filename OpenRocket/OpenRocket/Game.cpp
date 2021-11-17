@@ -433,8 +433,8 @@ void Game::CreateAsteroidBuffers() {
 		Vertices[9 * k + 5] = 0.0f;
 		Vertices[9 * k + 6] = 0.0f;
   
-		Vertices[9 * k + 7] = (sin(theta) + 1) / 2;
-		Vertices[9 * k + 8] = (cos(theta) + 1)/ 2;
+		Vertices[9 * k + 7] = (cos(theta) + 1) / 2;
+		Vertices[9 * k + 8] = (sin(theta) + 1)/ 2;
 	}
 	
 	glGenVertexArrays(1, &asteroidVao);

@@ -53,6 +53,9 @@ private:
 	GLuint heartVbo;
 	GLuint heartColorBufferId;
 
+	GLuint gameOverVao;
+	GLuint gameOverVbo;
+
 	glm::mat4 rocketMatrix = glm::mat4(1.0f);
 	glm::mat4 rocketScaleMatrix = glm::mat4(1.0f);
 	glm::mat4 rocketRotateMatrix = glm::mat4(1.0f);
@@ -78,6 +81,8 @@ private:
 
 	GLuint ProgramId;
 	GLuint TextureProgramId;
+
+	GLuint gameOverTexture;
 
 	int nrOfStars;
 	int score;
@@ -124,6 +129,7 @@ public:
 	void CreateAsteroidBuffers();
 	void CreateBulletBuffers();
 	void CreateHeartBuffers();
+	void CreateGameOverBuffers();
 
 	void InitializeLibraries();
 	void CreateShaders();

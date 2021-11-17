@@ -1,4 +1,3 @@
-// Shader-ul de fragment / Fragment shader  
 #version 400
 
 in vec4 ex_Color;
@@ -13,8 +12,6 @@ uniform sampler2D myTexture;
 out vec4 out_Color;
 
 void main(void)
-  {
-
-	 out_Color = texture(myTexture, tex_Coord);
-  }
-
+{
+	out_Color = texture(myTexture, tex_Coord);
+}

@@ -1,4 +1,3 @@
-
 #include <GL/glew.h>
 #include <GL/freeglut.h>
 #include <vector>
@@ -32,23 +31,25 @@ private:
     static Rocket* instance;
     
 	glm::mat4 rocketMatrix;
-	float positionX = 0;
-	float positionY = 0;
-	float boundsOffsetX = 800;
-	float boundsOffsetY = 135;
-	const float initialOffsetX = 800;
-	const float initialOffsetY = 100;
-	float bulletStartX = 800;
-	float bulletStartY = 100;
+	float positionX = 0.0f;
+	float positionY = 0.0f;
+	float boundsOffsetX = 800.0f;
+	float boundsOffsetY = 135.0f;
+	const float initialOffsetX = 800.0f;
+	const float initialOffsetY = 100.0f;
+	float bulletStartX = 800.0f;
+	float bulletStartY = 100.0f;
 
 	bool rightIsPressed = false;
 	bool leftIsPressed = false;
 	bool upIsPressed = false;
 	bool downIsPressed = false;
 
-	float moveAmount = 20;
+	float moveAmount = 20.0f;
 
+	int remainingLives;
 	bool isDead = false;
+	double lastCollisionTime;
 
 public:
 	Triangle frontTriangle;
@@ -61,39 +62,27 @@ public:
 	Triangle currentBottomWingsTriangle;
 	Rect currentBody;
 
-public:
     Rocket();
     static Rocket* getInstance();
 
-	glm::mat4 getRocketMatrix() { return rocketMatrix; }
-	float getIsDead() { return isDead; }
-	float getPositionX() { return positionX; }
-	float getPositionY() { return positionY; }
+	glm::mat4 getRocketMatrix() const { return rocketMatrix; }
+	float getIsDead() const { return isDead; }
+	float getPositionX() const { return positionX; }
+	float getPositionY() const { return positionY; }
+	float getBulletStartX() const { return bulletStartX; }
+	float getBulletStartY() const {	return bulletStartY; }
+	int getRemainingLives() const { return remainingLives; }
 
-	float getBulletStartX() const {
-		return bulletStartX;
-	}
-
-	float getBulletStartY() const {
-		return bulletStartY;
-	}
-
-	void setBulletStartX(float x) {
-		bulletStartX = x;
-	}
-
-	void setBulletStartY(float y) {
-		bulletStartY = y;
-	}
-
-	void MoveRocket(int key, int x, int y);
+	void setBulletStartX(float x) {	bulletStartX = x; }
+	void setBulletStartY(float y) {	bulletStartY = y; }
 	void setRocketMatrix(glm::mat4 matrix) { rocketMatrix = matrix; }
-	void RocketAsteroidsCollision(vector<Asteroid*> asteroids);
+
+	void RocketAsteroidsCollision(vector<Asteroid*>);
 	void CalculateCurrentPositions();
 
 	void Update();
-	void MarkKeyUp(int key, int x, int y);
-	void MarkKeyDown(int key, int x, int y);
+	void MarkKeyUp(int, int, int);
+	void MarkKeyDown(int, int, int);
 	void MoveRight();
 	void MoveLeft();
 	void MoveUp();

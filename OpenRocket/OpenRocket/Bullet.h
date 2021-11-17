@@ -11,43 +11,24 @@ private:
 	float y;
 	bool toBeDeleted = false;
 public:
-	Bullet(float radius, float posX, float posY);
-	~Bullet();
+	Bullet(float, float, float);
+	~Bullet() {}
 
-	float getRadius() const {
-		return radius;
-	}
-
-	float getX() const {
-		return x;
-	}
-
-	float getY() const {
-		return y;
-	}
-
-	float getTranslatedDistance() const {
-		return translatedDistance;
-	}
-
+	float getRadius() const;
+	float getX() const;
+	float getY() const;
+	float getTranslatedDistance() const;
+  
 	bool getToBeDeleted() { return toBeDeleted; }
-
-	void setX(float x) {
-		this->x = x;
-	}
-
-	void setY(float y) {
-		this->y = y;
-	}
-
-	void setTranslatedDistance(float distance) {
-		translatedDistance = distance;
-	}
-
 	void setToBeDeleted(bool t) { toBeDeleted = t; }
 
-	bool aboveViewport();
 	static glm::vec4 bulletCenter;
 	static glm::vec4 bulletPoint;
 	glm::mat4 bulletMatrix;
+
+	void setX(float);
+	void setY(float);
+	void setTranslatedDistance(float);
+
+	bool aboveViewport();
 };

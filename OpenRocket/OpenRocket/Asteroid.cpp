@@ -1,8 +1,8 @@
 #include "Asteroid.h"
 #include "Constants.h"
 
-glm::vec4 Asteroid::circlePoint = { 1.0f, 0.0f, 0.f, 1.f };
-glm::vec4 Asteroid::circleCenter = { 0.f, 0.0f, 0.f, 1.f };
+glm::vec4 Asteroid::circlePoint = { 1.0f, 0.0f, 0.0f, 1.0f };
+glm::vec4 Asteroid::circleCenter = { 0.0f, 0.0f, 0.0f, 1.0f };
 
 Asteroid::Asteroid(float radius = 40.0f, int nrOfVertices = 16, glm::vec4 coordinates = glm::vec4(0.0f,0.0f, 0.0f, 0.0f), 
 	glm::vec4 colors = glm::vec4(0.0f, 0.0f,0.0f,0.0f)) : 
@@ -11,7 +11,9 @@ Asteroid::Asteroid(float radius = 40.0f, int nrOfVertices = 16, glm::vec4 coordi
 	coordinates(coordinates), 
 	colors(colors), 
 	translatedDistance(0), 
-	currentZone(Constants::SAFE) {
+	currentZone(Constants::SAFE),
+	asteroidMatrix(glm::mat4(1.0f))
+{
 	textureIndex = rand() % Constants::nrOfTextures;
 };
 
@@ -27,7 +29,7 @@ bool Asteroid::inLowerHalf() {
 	return !this->belowViewport() && this->isInViewport() && this->getRealY() < Constants::height;
 }
 
-string Asteroid::getCurrentZone() {
+string Asteroid::getCurrentZone() const {
 	return this->currentZone;
 }
 
@@ -41,11 +43,11 @@ void Asteroid::updateState() {
 	}
 }
 
-float Asteroid::getX() { 
+float Asteroid::getX() const { 
 	return this->coordinates.x; 
 }
 
-float Asteroid::getRealY() { 
+float Asteroid::getRealY() const { 
 	return this->coordinates.y - this->translatedDistance; 
 }
 
@@ -56,10 +58,19 @@ void Asteroid::setX(float newXOffset) {
 void Asteroid::setY(float newYOffset) { 
 	this->coordinates.y = newYOffset;
 }
-int Asteroid::getTextureIndex() {
+
+int Asteroid::getTextureIndex() const {
 	return this->textureIndex;
 }
-float Asteroid::getTranslatedDistance() { return this->translatedDistance; }
+
+void Asteroid::setAsteroidMatrix(glm::mat4 matrix) { asteroidMatrix = matrix; }
+
+glm::mat4 Asteroid::getAsteroidMatrix() const { return asteroidMatrix; }
+
+float Asteroid::getTranslatedDistance() const { return this->translatedDistance; }
+
 void Asteroid::setTranslatedDistance(float distance) { this->translatedDistance = distance; }
-float Asteroid::getRadius() { return this->radius; }
-float Asteroid::getY() { return this->coordinates.y; }
+
+float Asteroid::getRadius() const { return this->radius; }
+
+float Asteroid::getY() const { return this->coordinates.y; }

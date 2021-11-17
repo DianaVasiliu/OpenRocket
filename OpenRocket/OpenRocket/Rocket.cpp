@@ -80,16 +80,16 @@ void Rocket::MoveDown() {
 }
 
 void Rocket::MarkKeyDown(int key, int x, int y) {
-	if (key == GLUT_KEY_RIGHT) { // tocmai s-a apasat tasta RIGHT
-		rightIsPressed = true;	 // marchez aceasta tasta ca pressed
-		MoveRight();			 // mut racheta catre dreapta
+	if (key == GLUT_KEY_RIGHT) {	// RIGHT just pressed
+		rightIsPressed = true;		// marking the key as pressed
+		MoveRight();				// moving the rocket to the right
 		if (upIsPressed) 
 		{
-			MoveUp();			 // daca tasta Up era deja apasata, mut racheta si in sus
+			MoveUp();				// if UP was already pressed, move the rocket up
 		}
 		else if (downIsPressed) 
 		{
-			MoveDown(); // daca tasta Down era deja apasata, mut racheta si in jos
+			MoveDown();				// if DOWN was already pressed, move the rocket down
 		}
 	}
 	if (key == GLUT_KEY_LEFT) {

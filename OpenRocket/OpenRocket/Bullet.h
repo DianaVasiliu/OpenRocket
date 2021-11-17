@@ -8,37 +8,17 @@ private:
 	float y;
 
 public:
-	Bullet(float radius, float posX, float posY);
-	~Bullet();
+	Bullet(float, float, float);
+	~Bullet() {}
 
-	float getRadius() const {
-		return radius;
-	}
+	float getRadius() const;
+	float getX() const;
+	float getY() const;
+	float getTranslatedDistance() const;
 
-	float getX() const {
-		return x;
-	}
-
-	float getY() const {
-		return y;
-	}
-
-	float getTranslatedDistance() const {
-		return translatedDistance;
-	}
-
-	void setX(float x) {
-		this->x = x;
-	}
-
-	void setY(float y) {
-		this->y = y;
-	}
-
-	void setTranslatedDistance(float distance) {
-		translatedDistance = distance;
-	}
+	void setX(float);
+	void setY(float);
+	void setTranslatedDistance(float);
 
 	bool aboveViewport();
-
 };

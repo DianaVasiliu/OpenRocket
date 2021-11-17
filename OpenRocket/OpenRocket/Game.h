@@ -15,41 +15,26 @@
 
 using namespace std;
 
-
-
 class Game {
 private:
 	static Game* instance;
 	static vector<GLuint> textures;
-	GLuint backgroundVao;
-	GLuint backgroundVbo;
-	GLuint backgroundEbo;
-	GLuint backgroundColorBufferId;
+
+	GLfloat RocketVertices[1000];
 	glm::mat4 backgroundMatrix = glm::mat4(1.0f);
 	glm::mat4 backgroundScaleMatrix = glm::mat4(1.0f);
 	glm::mat4 backgroundRotateMatrix = glm::mat4(1.0f);
 	glm::mat4 backgroundTranslateMatrix = glm::mat4(1.0f);
-	float rotationAngle = 0.0f;
-	float rotationSpeed = 0.0005f;
 
-	GLfloat RocketVertices[1000];
+	GLuint backgroundVao;
+	GLuint backgroundVbo;
+	GLuint backgroundEbo;
+	GLuint backgroundColorBufferId;
+
 	GLuint rocketVao;
 	GLuint rocketVbo;
 	GLuint rocketEbo;
 	GLuint rocketColorBufferId;
-	glm::mat4 rocketMatrix = glm::mat4(1.0f);
-	glm::mat4 rocketScaleMatrix = glm::mat4(1.0f);
-	glm::mat4 rocketRotateMatrix = glm::mat4(1.0f);
-	glm::mat4 rocketTranslateMatrix = glm::mat4(1.0f);
-
-	float fireTailVelocity = 0.0075;
-	float fireSidesVelocity = fireTailVelocity / 4;
-	float resetTailEvery = 10.0;
-	float resetSidesEvery = resetTailEvery / 4;
-	float fireTail = 0.0;
-	float fireSides = 0.0;
-	float fireGoingUp = true;
-	float fireGoingDown = false;
 
 	GLuint asteroidVao;
 	GLuint asteroidVbo;
@@ -59,8 +44,7 @@ private:
 	GLuint bulletVao;
 	GLuint bulletVbo;
 	GLuint bulletColorBufferId;
-	double lastBulletTime = 0.0f;
-  
+
 	GLuint squareVao;
 	GLuint squareVbo;
 	GLuint squareColorBufferId;
@@ -68,6 +52,25 @@ private:
 	GLuint heartVao;
 	GLuint heartVbo;
 	GLuint heartColorBufferId;
+
+	glm::mat4 rocketMatrix = glm::mat4(1.0f);
+	glm::mat4 rocketScaleMatrix = glm::mat4(1.0f);
+	glm::mat4 rocketRotateMatrix = glm::mat4(1.0f);
+	glm::mat4 rocketTranslateMatrix = glm::mat4(1.0f);
+
+	float fireTailVelocity = 0.0075f;
+	float fireSidesVelocity = fireTailVelocity / 4;
+	float resetTailEvery = 10.0f;
+	float resetSidesEvery = resetTailEvery / 4;
+	float fireTail = 0.0f;
+	float fireSides = 0.0f;
+	bool fireGoingUp = true;
+	bool fireGoingDown = false;
+
+	double lastBulletTime = 0.0f;
+
+	float rotationAngle = 0.0f;
+	float rotationSpeed = 0.0005f;
 
 	int width;
 	int height;
@@ -79,8 +82,8 @@ private:
 	int nrOfStars;
 
 	int colorCode;
-	int init_pos_x;
-	int init_pos_y;
+	int initPosX;
+	int initPosY;
 	int maxX;
 	int maxY;
 
@@ -97,21 +100,22 @@ private:
 	glm::mat4 mTest;
 
 public:
-	Game(int initial_pos_x, int initial_pos_y);
-	~Game();
+	Game(int, int);
+	~Game() { }
+
 	vector<Asteroid*> asteroids;
 	vector<Bullet*> bullets;
 	static Game* getInstance();
 
 	void setHeight(int h) { height = h; }
 	void setWidth(int w) { width = w; }
-	void setInitPosX(int x) { init_pos_x = x; }
-	void setInitPosY(int y) { init_pos_y = y; }
+	void setInitPosX(int x) { initPosX = x; }
+	void setInitPosY(int y) { initPosY = y; }
 
-	int getHeight() { return height; }
-	int getWidth() { return width; }
-	int getInitPosX() { return init_pos_x; }
-	int getInitPosY() { return init_pos_y; }
+	int getHeight() const { return height; }
+	int getWidth() const { return width; }
+	int getInitPosX() const { return initPosX; }
+	int getInitPosY() const { return initPosY; }
 
 	void CreateBackgroundBuffers();
 	void CreateRocketBuffers();
@@ -119,9 +123,7 @@ public:
 	void CreateBulletBuffers();
 	void CreateHeartBuffers();
 
-	void moveRocket(int key, int x, int y);
-
-	void InitializeGlew();
+	void InitializeLibraries();
 	void CreateShaders();
 	void DestroyShaders(void);
 	void Cleanup(void);
@@ -130,10 +132,10 @@ public:
 	void InitializeGame();
 	void RenderFunction(void);
 
-	void GenerateAsteroids(int nrOfAsteroids);
+	void GenerateAsteroids(int);
 	Asteroid* GenerateSingleAsteroid();
 	void UpdateAsteroids();
-	float generateOffset(float, float, static const string);
+	float generateOffset(float, float, const string);
 
 	void move();
 	void mouseHandler(int, int, int, int);
@@ -142,7 +144,6 @@ public:
 	void UpdateBullets();
 	void GenerateBullet();
   
-	void RocketAsteroidCollision();
 	void LoadTexture(GLuint&, const char*);
 	void loadTextures();
 };

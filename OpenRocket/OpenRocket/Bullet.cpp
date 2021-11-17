@@ -14,3 +14,31 @@ Bullet::Bullet(float radius, float posX, float posY) :
 bool Bullet::aboveViewport() {
 	return this->y > Constants::height;
 }
+
+float Bullet::getRadius() const {
+	return radius;
+}
+
+float Bullet::getX() const {
+	return x;
+}
+
+float Bullet::getY() const {
+	return y;
+}
+
+float Bullet::getTranslatedDistance() const {
+	return translatedDistance;
+}
+
+void Bullet::setX(float x) {
+	this->x = x;
+}
+
+void Bullet::setY(float y) {
+	this->y = y;
+}
+
+void Bullet::setTranslatedDistance(float distance) {
+	translatedDistance = distance;
+}

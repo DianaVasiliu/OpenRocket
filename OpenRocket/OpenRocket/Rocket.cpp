@@ -234,6 +234,9 @@ void Rocket::RocketAsteroidsCollision(vector<Asteroid*> asteroids)
 
 			if (remainingLives == 0) {
 				isDead = true;
+
+				Game* game = Game::getInstance();
+				std::cout << "Your score is: " << game->getScore() / 2 << "\n";
 			}
 		}
 

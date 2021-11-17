@@ -50,6 +50,7 @@ Game* Game::getInstance() {
 
 Game::Game(int initial_pos_x, int initial_pos_y) :
 	nrOfStars(Constants::nrOfStars),
+	score(0),
 	width(Constants::maxX),
 	height(Constants::maxY),
 	maxX(Constants::maxX),
@@ -241,10 +242,13 @@ void Game::RenderFunction(void) {
 		glBindVertexArray(asteroidVao);
 		glDrawArrays(GL_POLYGON, 0, Constants::nrOfVerticesPerCircle);
 	}	
+
 	glDisable(GL_TEXTURE_2D);
 	glUseProgram(ProgramId);
 	myMatrixLocation = glGetUniformLocation(ProgramId, "myMatrix");
+
 	Game::UpdateBullets();
+
 	for (auto& bullet : bullets) {
 		glm::mat4 bulletMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(bullet->getRadius(), bullet->getRadius(), 1.0f));
 		glm::mat4 animateMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0, bullet->getY(), 0.0));
@@ -586,8 +590,7 @@ double distance(glm::vec4 p1, glm::vec4 p2) {
 }
 
 void Game::BulletAsteroidCollision() {
-	vector<int> eraseAsteroids;
-	vector<int> eraseBullets;
+
 	for (int i = 0; i < int(bullets.size()); i++) {
 		for (int j = 0; j < int(asteroids.size()); j++) {
 			glm::vec4 currentBulletCenter = bullets[i]->bulletMatrix * Bullet::bulletCenter;
@@ -602,6 +605,7 @@ void Game::BulletAsteroidCollision() {
 			if (distance(currentAsteroidCenter, currentBulletCenter) < currentBulletRadius + currentAsteroidRadius) {
 				bullets[i]->setToBeDeleted(true);
 				asteroids[j]->setToBeDeleted(true);
+				score++;
 			}
 		}
 	}

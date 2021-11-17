@@ -1,5 +1,21 @@
 #include "helpers.h"
+#include "Rocket.h"
 #include <iostream>
+
+void makeCheckImage(void)
+{
+	int i, j, c;
+	for (i = 0; i < checkImageHeight; i++) {
+		for (j = 0; j < checkImageWidth; j++) {
+			c = ((((i & 0x8) == 0) ^ ((j & 0x8)) == 0)) * 200;
+
+			checkImage[i][j][0] = (GLubyte)c;
+			checkImage[i][j][1] = (GLubyte)c;
+			checkImage[i][j][2] = (GLubyte)c;
+			checkImage[i][j][3] = (GLubyte)255;
+		}
+	}
+}
 
 void cleanupCallback() {
 	Game* game = Game::getInstance();

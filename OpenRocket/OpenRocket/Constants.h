@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <vector>
 
 class Constants
 {
@@ -23,6 +24,8 @@ public:
     static const std::string yCoord;
     static const std::string RED;
     static const std::string SAFE;
+    static const std::vector<const char*> textureImages;
+    static const int nrOfTextures;
     static const float bulletSpeed;
     static const double bulletSpawnCooldown;
     static const float bulletRadius;

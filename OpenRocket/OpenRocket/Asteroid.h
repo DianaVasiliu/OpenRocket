@@ -20,7 +20,7 @@ private:
 	float radius;
 	float translatedDistance;
 	string currentZone;
-
+	int textureIndex;
 public:
 	glm::mat4 asteroidMatrix;
 	static glm::vec4 circlePoint;
@@ -41,6 +41,7 @@ public:
 	float getY();
 	float getRadius();
 	float getTranslatedDistance();
+	int getTextureIndex();
 	glm::mat4 getAsteroidMatrix() { return asteroidMatrix; }
 
 	void setX(float);

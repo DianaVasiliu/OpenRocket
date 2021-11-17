@@ -8,6 +8,7 @@
 #include <GL/glew.h>
 #include <GL/freeglut.h>
 
+vector<GLuint> Game::textures;
 void Game::move(void)
 {
 	for (auto& asteroid : asteroids) {
@@ -69,8 +70,8 @@ void Game::InitializeGlew() {
 	glutCloseFunc(cleanupCallback); 
 }
 
-void Game::CreateShaders(const char* vertShader, const char* fragShader) {
-	ProgramId = LoadShaders(vertShader, fragShader);
+void Game::CreateShaders() {
+	ProgramId = LoadShaders("04_03_Shader.vert", "04_03_Shader.frag");
 	TextureProgramId = LoadShaders("Texturare_Shader.vert", "Texturare_Shader.frag");
 	glUseProgram(ProgramId);
 }
@@ -96,12 +97,11 @@ void Game::DestroyBackgroundVBO(void) {
 	//glDeleteVertexArrays(1, &VaoId);
 }
 
-void Game::InitializeGame(const char* vertShader, const char* fragShader) {
-	CreateShaders("04_03_Shader.vert", "04_03_Shader.frag");
+void Game::InitializeGame() {
+	CreateShaders();
 
 	resizeMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(1.f / maxX, 1.f / maxY, 1.0));
 	matrTransl = glm::translate(glm::mat4(1.0f), glm::vec3(-maxX, -maxY, 0.0));
-
 	myMatrix = resizeMatrix * matrTransl;
 
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -200,7 +200,7 @@ void Game::RenderFunction(void) {
 	glActiveTexture(GL_TEXTURE0);
 	
 	for (auto& asteroid : asteroids) {
-		glBindTexture(GL_TEXTURE_2D, textures[asteroid->getTextureIndex()]);
+		glBindTexture(GL_TEXTURE_2D, Game::textures[asteroid->getTextureIndex()]);
 		glm::mat4 asteroidMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(asteroid->getRadius(), asteroid->getRadius(), 1.0));
 		glm::mat4 animateMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0, - asteroid->getTranslatedDistance(), 0.0)); // controleaza translatia de-a lungul lui Oy
 		backgroundMatrix = backgroundScaleMatrix * backgroundTranslateMatrix;
@@ -440,6 +440,6 @@ void Game::loadTextures() {
 	for (auto& imageName : Constants::textureImages) {
 		GLuint texture;
 		LoadTexture(texture, imageName);
-		textures.push_back(texture);
+		Game::textures.push_back(texture);
 	}	
 }

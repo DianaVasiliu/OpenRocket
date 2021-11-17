@@ -14,11 +14,12 @@
 
 using namespace std;
 
-static vector<GLuint> textures;
+
 
 class Game {
 private:
 	static Game* instance;
+	static vector<GLuint> textures;
 	GLuint backgroundVao;
 	GLuint backgroundVbo;
 	GLuint backgroundEbo;
@@ -103,12 +104,12 @@ public:
 
 	void CreateAsteroidBuffers();
 	void InitializeGlew();
-	void CreateShaders(const char* vertShader, const char* fragShader);
+	void CreateShaders();
 	void DestroyShaders(void);
 	void Cleanup(void);
 	void DestroyBackgroundVBO(void);
 
-	void InitializeGame(const char* vertShader, const char* fragShader);
+	void InitializeGame();
 	void RenderFunction(void);
 	void GenerateAsteroids(int nrOfAsteroids);
 	Asteroid* GenerateSingleAsteroid();

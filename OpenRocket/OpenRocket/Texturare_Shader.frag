@@ -15,6 +15,6 @@ out vec4 out_Color;
 void main(void)
   {
 
-	 out_Color = mix(texture(myTexture, tex_Coord), ex_Color, 0.2);
+	 out_Color = texture(myTexture, tex_Coord);
   }
 

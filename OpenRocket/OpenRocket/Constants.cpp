@@ -22,7 +22,9 @@ const std::string Constants::SAFE= "Safe Zone";
 const std::vector<const char*> Constants::textureImages{
 	"blueAsteroid.png",
 	"brightOrangeAsteroid.png",
+	"darkBlueAsteroid.png",
+	"greenAsteroid.png",
 	"orangeAsteroid.png",
 	"turquoiseAsteroid.png"
 };
-const int Constants::nrOfTextures = 4;
+const int Constants::nrOfTextures = 6;

@@ -1,5 +1,6 @@
 #include "helpers.h"
 #include "Rocket.h"
+#include <iostream>
 
 void makeCheckImage(void)
 {
@@ -35,11 +36,26 @@ void keysUpCallback(int key, int x, int y) {
 	Rocket* rocket = Rocket::getInstance();
 	rocket->MarkKeyUp(key, x, y);
 }
+
 void moveCallback() {
 	Game* game = Game::getInstance();
 	game->move();
 }
+
 void mouseCallback(int button, int state, int x, int y) {
 	Game* game = Game::getInstance();
 	game->mouseHandler(button, state, x, y);
+}
+
+void processNormalKeys(unsigned char key, int x, int y)
+{
+	Game * game = Game::getInstance();
+	switch (key) {
+	case 'm':	
+		game->GenerateBullet();
+		break;
+	default:
+		break;
+
+	}
 }

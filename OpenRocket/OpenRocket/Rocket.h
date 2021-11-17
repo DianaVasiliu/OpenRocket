@@ -48,7 +48,9 @@ private:
 
 	float moveAmount = 20;
 
+	int remainingLives;
 	bool isDead = false;
+	double lastCollisionTime;
 
 public:
 	Triangle frontTriangle;
@@ -76,6 +78,10 @@ public:
 
 	float getBulletStartY() const {
 		return bulletStartY;
+	}
+
+	int getRemainingLives() {
+		return remainingLives;
 	}
 
 	void setBulletStartX(float x) {

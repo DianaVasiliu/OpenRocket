@@ -64,6 +64,7 @@ Game::Game(int initial_pos_x, int initial_pos_y) :
 	maxY = height / 2;
 
 	InitializeGlew();
+	CreateHeartBuffers();
 	CreateBackgroundBuffers();
 	CreateRocketBuffers();
 	CreateAsteroidBuffers();
@@ -165,11 +166,15 @@ void Game::FireAnimation() {
 
 void Game::RenderFunction(void) {
 	Rocket* rocket = Rocket::getInstance();
-	if (rocket->getIsDead()) {
-		return;
-	}
+
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
+
+	if (rocket->getIsDead()) {
+		// TODO: render a png with the text GAME OVER
+		//glutSwapBuffers();
+		return;
+	}
 
 	if (rotationAngle > 360.f) {
 		rotationAngle = 0.0f;
@@ -243,16 +248,26 @@ void Game::RenderFunction(void) {
 		glBindVertexArray(bulletVao);
 		glDrawArrays(GL_POLYGON, 0, Constants::nrOfVerticesPerCircle);
 	}	
+
 	rocket->RocketAsteroidsCollision(asteroids);
+	
+	glm::mat4 heartMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(4.7f, 4.7f, 1.0f));
+	heartMatrix = backgroundMatrix * heartMatrix;
+
+	glm::mat4 heartTranslateMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(10.0f, 0.0f, 0.0f));
+	for (int i = 0; i < rocket->getRemainingLives(); i++) {
+		if (i != 0) {
+			heartMatrix = heartMatrix * heartTranslateMatrix;
+		}
+		glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &heartMatrix[0][0]);
+		glBindVertexArray(heartVao);
+		glDrawArrays(GL_POLYGON, 0, 14);
+	}
 
 	glutPostRedisplay();
 	glFlush();
 }
 
-bool colliding(Rocket rocket, Asteroid asteroid)
-{
-	return false;
-}
 void Game::CreateBackgroundBuffers() {
 
 	const int nrOfVertices = 1000 * 5;
@@ -391,7 +406,6 @@ void Game::CreateAsteroidBuffers() {
 	GLfloat Vertices[1000];
 	for (int k = 0; k < Constants::nrOfVerticesPerCircle; k++) {
 		float theta = Constants::TWO_PI * k / Constants::nrOfVerticesPerCircle;
-		//cout << "angle " << float(Constants::TWO_PI * float(k)) / float(Constants::nrOfVerticesPerCircle) << "\n";
 		float x = cos(theta);
 		float y = sin(theta);
 		// varfurile corespunzatoare cercului
@@ -399,13 +413,11 @@ void Game::CreateAsteroidBuffers() {
 		Vertices[9 * k + 1] = y;
 		Vertices[9 * k + 2] = 0.0f;
 		Vertices[9 * k + 3] = 1.0f;
-		//cout << 4*k << " " << Vertices[4 * k] << " " << Vertices[4 * k + 1] << " " << Vertices[4 * k + 2] << " " << Vertices[4 * k + 3] << "\n";
 
 		Vertices[9 * k + 4] = 1.0f;
 		Vertices[9 * k + 5] = 0.0f;
 		Vertices[9 * k + 6] = 0.0f;
-
-		//cout << (float)k / 18 << " ";
+  
 		Vertices[9 * k + 7] = (sin(theta) + 1) / 2;
 		Vertices[9 * k + 8] = (cos(theta) + 1)/ 2;
 	}
@@ -435,6 +447,7 @@ void Game::CreateAsteroidBuffers() {
 	glEnableVertexAttribArray(2);
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), (GLvoid*)(7 * sizeof(GLfloat)));
 }
+
 void Game::UpdateAsteroids() {
 	auto end = std::remove_if(asteroids.begin(),
 		asteroids.end(),
@@ -481,6 +494,7 @@ void Game::GenerateAsteroids(int nrOfAsteroids) {
 		this->asteroids.push_back(Game::GenerateSingleAsteroid());
 	}
 }
+
 void Game::LoadTexture(GLuint &texture, const char* imageName)
 {
 	glGenTextures(1, &texture);
@@ -499,6 +513,7 @@ void Game::LoadTexture(GLuint &texture, const char* imageName)
 	SOIL_free_image_data(image);
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
+
 void Game::loadTextures() {
 	for (auto& imageName : Constants::textureImages) {
 		GLuint texture;
@@ -571,4 +586,54 @@ void Game::UpdateBullets() {
 		});
 
 	bullets.erase(end, bullets.end());
+}
+
+void Game::CreateHeartBuffers() {
+	
+	GLfloat Vertices[] = {
+		7.0f, 3.7f, 0.0f, 1.0f,
+		
+		8.0f, 4.5f, 0.0f, 1.0f,
+		9.6f, 6.0f, 0.0f, 1.0f,
+		10.4f, 7.5f, 0.0f, 1.0f,
+		10.0f, 9.0f, 0.0f, 1.0f,
+		8.7f, 9.8f, 0.0f, 1.0f,
+		7.8f, 9.7f, 0.0f, 1.0f,
+		
+		7.0f, 8.9f, 0.0f, 1.0f,
+		
+		6.2f, 9.7f, 0.0f, 1.0f,
+		5.3f, 9.8f, 0.0f, 1.0f,
+		4.0f, 9.0f, 0.0f, 1.0f,
+		3.6f, 7.5f, 0.0f, 1.0f,
+		4.4f, 6.0f, 0.0f, 1.0f,
+		6.0f, 4.5f, 0.0f, 1.0f,
+	};
+
+	const int verticesCount = sizeof(Vertices) / sizeof(GLfloat);
+
+	GLfloat Colors[verticesCount];
+
+	for (int i = 0; i < verticesCount; i += 4) {
+		Colors[i] = 1.0f;
+		Colors[i + 1] = 0.0f;
+		Colors[i + 2] = 0.0f;
+		Colors[i + 3] = 1.0f;
+	}
+
+	glGenBuffers(1, &heartVbo);
+	glBindBuffer(GL_ARRAY_BUFFER, heartVbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(Vertices), Vertices, GL_STATIC_DRAW);
+
+	glGenVertexArrays(1, &heartVao);
+	glBindVertexArray(heartVao);
+
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(0);
+
+	glGenBuffers(1, &heartColorBufferId);
+	glBindBuffer(GL_ARRAY_BUFFER, heartColorBufferId);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(Colors), Colors, GL_STATIC_DRAW);
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(1);
 }

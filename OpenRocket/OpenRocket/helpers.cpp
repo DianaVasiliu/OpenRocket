@@ -51,11 +51,11 @@ void processNormalKeys(unsigned char key, int x, int y)
 {
 	Game * game = Game::getInstance();
 	switch (key) {
-	case 'm':	
+	case 'm':
+	case 'M':
 		game->GenerateBullet();
 		break;
 	default:
 		break;
-
 	}
 }

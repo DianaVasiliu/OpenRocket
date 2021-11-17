@@ -32,3 +32,5 @@ const float Constants::bulletSpeed = 0.1;
 const double Constants::bulletSpawnCooldown = 0.1;
 const float Constants::bulletRadius = 2.5f;
 const int Constants::nrOfBulletsPerFrame = 8;
+const int Constants::maxLives = 3;
+const double Constants::timeToEscapeAsteroid = 1;

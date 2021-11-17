@@ -19,6 +19,15 @@ const std::string Constants::xCoord = "x";
 const std::string Constants::yCoord = "y";
 const std::string Constants::RED = "Red Zone";
 const std::string Constants::SAFE= "Safe Zone";
+const std::vector<const char*> Constants::textureImages{
+	"blueAsteroid.png",
+	"brightOrangeAsteroid.png",
+	"darkBlueAsteroid.png",
+	"greenAsteroid.png",
+	"orangeAsteroid.png",
+	"turquoiseAsteroid.png"
+};
+const int Constants::nrOfTextures = 6;
 const float Constants::bulletSpeed = 0.1;
 const double Constants::bulletSpawnCooldown = 0.1;
 const float Constants::bulletRadius = 2.5f;

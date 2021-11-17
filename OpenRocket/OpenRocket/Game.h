@@ -2,8 +2,6 @@
 
 #include <GL/glew.h>
 #include <GL/freeglut.h>
-#include "Rocket.h"
-
 #include <vector>
 #include <algorithm>
 #include <string>
@@ -17,9 +15,12 @@
 
 using namespace std;
 
+
+
 class Game {
 private:
 	static Game* instance;
+	static vector<GLuint> textures;
 	GLuint backgroundVao;
 	GLuint backgroundVbo;
 	GLuint backgroundEbo;
@@ -34,6 +35,7 @@ private:
 	GLfloat RocketVertices[1000];
 	GLuint rocketVao;
 	GLuint rocketVbo;
+	GLuint rocketEbo;
 	GLuint rocketColorBufferId;
 	glm::mat4 rocketMatrix = glm::mat4(1.0f);
 	glm::mat4 rocketScaleMatrix = glm::mat4(1.0f);
@@ -51,6 +53,7 @@ private:
 
 	GLuint asteroidVao;
 	GLuint asteroidVbo;
+	GLuint asteroidEbo;
 	GLuint asteroidColorBufferId;
 
 	GLuint bulletVao;
@@ -64,8 +67,10 @@ private:
 
 	int width;
 	int height;
+	int codCol;
 
 	GLuint ProgramId;
+	GLuint TextureProgramId;
 
 	int nrOfStars;
 
@@ -112,12 +117,12 @@ public:
 	void moveRocket(int key, int x, int y);
 
 	void InitializeGlew();
-	void CreateShaders(const char* vertShader, const char* fragShader);
+	void CreateShaders();
 	void DestroyShaders(void);
 	void Cleanup(void);
 	void DestroyVBO(void);
 
-	void InitializeGame(const char* vertShader, const char* fragShader);
+	void InitializeGame();
 	void RenderFunction(void);
 
 	void GenerateAsteroids(int nrOfAsteroids);
@@ -133,4 +138,6 @@ public:
 	void GenerateBullet();
   
 	void RocketAsteroidCollision();
+	void LoadTexture(GLuint&, const char*);
+	void loadTextures();
 };

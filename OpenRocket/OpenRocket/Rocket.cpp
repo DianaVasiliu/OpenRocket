@@ -1,11 +1,24 @@
 #include "loadShaders.h"
 #include "helpers.h"
 #include "Constants.h"
-
+#include "Rocket.h"
 #include <GL/glew.h>
 #include <GL/freeglut.h>
 
 Rocket* Rocket::instance = nullptr;
+
+void displayMatrix(glm::mat4 matrix)
+{
+	//cout << "intra aici";
+	for (int ii = 0; ii < 4; ii++)
+	{
+		for (int jj = 0; jj < 4; jj++)
+			cout << matrix[ii][jj] << "  ";
+		cout << endl;
+	};
+	cout << "\n";
+
+};
 
 Rocket::Rocket() 
 {

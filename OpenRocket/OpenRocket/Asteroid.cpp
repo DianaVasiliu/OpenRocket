@@ -12,6 +12,7 @@ Asteroid::Asteroid(float radius = 40.0f, int nrOfVertices = 16, glm::vec4 coordi
 	colors(colors), 
 	translatedDistance(0), 
 	currentZone(Constants::SAFE) {
+	textureIndex = rand() % Constants::nrOfTextures;
 };
 
 bool Asteroid::isInViewport() {
@@ -55,19 +56,10 @@ void Asteroid::setX(float newXOffset) {
 void Asteroid::setY(float newYOffset) { 
 	this->coordinates.y = newYOffset;
 }
-
-float Asteroid::getTranslatedDistance() { 
-	return this->translatedDistance; 
+int Asteroid::getTextureIndex() {
+	return this->textureIndex;
 }
-
-void Asteroid::setTranslatedDistance(float distance) { 
-	this->translatedDistance = distance; 
-}
-
-float Asteroid::getRadius() { 
-	return this->radius; 
-}
-
-float Asteroid::getY() { 
-	return this->coordinates.y;
-}
+float Asteroid::getTranslatedDistance() { return this->translatedDistance; }
+void Asteroid::setTranslatedDistance(float distance) { this->translatedDistance = distance; }
+float Asteroid::getRadius() { return this->radius; }
+float Asteroid::getY() { return this->coordinates.y; }

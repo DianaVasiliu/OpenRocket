@@ -584,8 +584,6 @@ double distance(glm::vec4 p1, glm::vec4 p2) {
 
 
 void Game::BulletAsteroidCollision() {
-	vector<int> eraseAsteroids;
-	vector<int> eraseBullets;
 	for (int i = 0; i < int(bullets.size()); i++) {
 		for (int j = 0; j < int(asteroids.size()); j++) {
 			glm::vec4 currentBulletCenter = bullets[i]->bulletMatrix * Bullet::bulletCenter;

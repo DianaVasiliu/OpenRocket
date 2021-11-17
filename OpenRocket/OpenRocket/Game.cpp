@@ -204,11 +204,8 @@ void Game::RenderFunction(void) {
 
 	float posX = rocket->getPositionX();
 	float posY = rocket->getPositionY();
-	glm::mat4 scaleMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f / maxX, 1.0f / maxY, 1.0f));
-	glm::mat4 translateMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(-maxX, -maxY, 0.0f));
 	glm::mat4 rocketTranslateMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(posX, posY, 0.0f));
-
-	glm::mat4 matrix = scaleMatrix * translateMatrix * rocketTranslateMatrix;
+	glm::mat4 matrix = backgroundScaleMatrix * backgroundTranslateMatrix * rocketTranslateMatrix;
 	rocket->setRocketMatrix(matrix);
 
 	myMatrixLocation = glGetUniformLocation(ProgramId, "myMatrix");
@@ -234,20 +231,26 @@ void Game::RenderFunction(void) {
 		glBindTexture(GL_TEXTURE_2D, Game::textures[asteroid->getTextureIndex()]);
 		glm::mat4 asteroidMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(asteroid->getRadius(), asteroid->getRadius(), 1.0));
 		glm::mat4 animateMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0, - asteroid->getTranslatedDistance(), 0.0)); // controleaza translatia de-a lungul lui Oy
-		asteroidMatrix = backgroundMatrix *  animateMatrix * glm::translate(glm::mat4(1.0f), glm::vec3(asteroid->getX(), asteroid->getY(), 0.0)) * asteroidMatrix;
+		glm::mat4 asteroidTranslateMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(asteroid->getX(), asteroid->getY(), 0.0));
+		asteroidMatrix = backgroundMatrix *  animateMatrix * asteroidTranslateMatrix * asteroidMatrix;
 		asteroid->setAsteroidMatrix(asteroidMatrix);
 		glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &asteroidMatrix[0][0]);
 		glBindVertexArray(asteroidVao);
 		glDrawArrays(GL_POLYGON, 0, Constants::nrOfVerticesPerCircle);
 	}	
+
 	glDisable(GL_TEXTURE_2D);
 	glUseProgram(ProgramId);
+
 	myMatrixLocation = glGetUniformLocation(ProgramId, "myMatrix");
+
 	Game::UpdateBullets();
+
 	for (auto& bullet : bullets) {
 		glm::mat4 bulletMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(bullet->getRadius(), bullet->getRadius(), 1.0f));
 		glm::mat4 animateMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0, bullet->getY(), 0.0));
-		bulletMatrix = backgroundMatrix * animateMatrix * glm::translate(glm::mat4(1.0f), glm::vec3(bullet->getX(), bullet->getY(), 0.0)) * bulletMatrix;
+		glm::mat4 bulletTranslateMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(bullet->getX(), bullet->getY(), 0.0));
+		bulletMatrix = backgroundMatrix * animateMatrix * bulletTranslateMatrix * bulletMatrix;
 
 		glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &bulletMatrix[0][0]);
 		glBindVertexArray(bulletVao);

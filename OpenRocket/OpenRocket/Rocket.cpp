@@ -132,17 +132,18 @@ void Rocket::MarkKeyDown(int key, int x, int y) {
 
 float dist(glm::vec4 pt, glm::vec4 p1, glm::vec4 p2)
 {
+	// Calculate the Ox and Oy distances between the 2 points of the line segment.
 	float dx = p2[0] - p1[0];
 	float dy = p2[1] - p1[1];
 	if ((dx == 0) && (dy == 0))
 	{
-		// It's a point not a line segment.
 		dx = pt[0] - p1[0];
 		dy = pt[1] - p1[1];
 		return sqrt(dx * dx + dy * dy);
 	}
 
-	// Calculate the t that minimizes the distance.
+	// t is the relative distance between the point of projection of the point on the line segment.
+	// We calculate the t that minimizez the distance between the point and the line segment.
 	float t = ((pt[0] - p1[0]) * dx + (pt[1] - p1[1]) * dy) / (dx * dx + dy * dy);
 
 	// See if this represents one of the segment's
@@ -167,7 +168,6 @@ float dist(glm::vec4 pt, glm::vec4 p1, glm::vec4 p2)
 		dy = pt[1] - closest[1];
 	}
 
-	//cout << sqrt(dx * dx + dy * dy) << "\n";
 	return sqrt(dx * dx + dy * dy);
 }
 

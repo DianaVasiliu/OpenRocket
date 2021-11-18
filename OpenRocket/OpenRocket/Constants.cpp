@@ -27,6 +27,7 @@ const std::vector<const char*> Constants::textureImages {
 	"orangeAsteroid.png",
 	"turquoiseAsteroid.png"
 };
+const char* Constants::gameOverTexture = "gameOver.png";
 const int Constants::nrOfTextures = 6;
 const float Constants::bulletSpeed = 0.1f;
 const double Constants::bulletSpawnCooldown = 0.1;

@@ -71,6 +71,7 @@ Game::Game(int initial_pos_x, int initial_pos_y) :
 	CreateRocketBuffers();
 	CreateAsteroidBuffers();
 	CreateBulletBuffers();
+	CreateGameOverBuffers();
 	GenerateAsteroids(Constants::nrOfAsteroidsPerFrame);
 }
 
@@ -90,7 +91,7 @@ void Game::InitializeLibraries() {
 
 void Game::CreateShaders() {
 	ProgramId = LoadShaders("vertShader.vert", "fragShader.frag");
-	TextureProgramId = LoadShaders("asteroidTextureShader.vert", "asteroidTextureShader.frag");
+	TextureProgramId = LoadShaders("textureShader.vert", "textureShader.frag");
 	glUseProgram(ProgramId);
 }
 
@@ -120,6 +121,7 @@ void Game::DestroyVBO(void) {
 	glDeleteBuffers(1, &squareVbo);
 	glDeleteBuffers(1, &heartColorBufferId);
 	glDeleteBuffers(1, &heartVbo);
+	glDeleteBuffers(1, &gameOverVbo);
 
 	glBindVertexArray(0);
 }
@@ -175,11 +177,21 @@ void Game::RenderFunction(void) {
 	Rocket* rocket = Rocket::getInstance();
 
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	if (rocket->getIsDead()) {
-		// TODO: render a png with the text GAME OVER
-		//glutSwapBuffers();
+		glUseProgram(TextureProgramId);
+		myMatrixLocation = glGetUniformLocation(TextureProgramId, "myMatrix");
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, gameOverTexture);
+
+		glm::mat4 gameOverMatrix = backgroundMatrix;
+		glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &gameOverMatrix[0][0]);
+		glBindVertexArray(gameOverVao);
+		glDrawArrays(GL_POLYGON, 0, 4);
+
+		glFlush();
 		return;
 	}
 
@@ -391,7 +403,7 @@ void Game::CreateRocketBuffers() {
 	glBindBuffer(GL_ARRAY_BUFFER, squareVbo);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(Square), Square, GL_STATIC_DRAW);
 
-	glGenVertexArrays(1, &squareVbo);
+	glGenVertexArrays(1, &squareVao);
 	glBindVertexArray(squareVao);
 
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
@@ -421,8 +433,8 @@ void Game::CreateAsteroidBuffers() {
 		Vertices[9 * k + 5] = 0.0f;
 		Vertices[9 * k + 6] = 0.0f;
   
-		Vertices[9 * k + 7] = (sin(theta) + 1) / 2;
-		Vertices[9 * k + 8] = (cos(theta) + 1)/ 2;
+		Vertices[9 * k + 7] = (cos(theta) + 1) / 2;
+		Vertices[9 * k + 8] = (sin(theta) + 1)/ 2;
 	}
 	
 	glGenVertexArrays(1, &asteroidVao);
@@ -516,7 +528,8 @@ void Game::loadTextures() {
 		GLuint texture;
 		LoadTexture(texture, imageName);
 		Game::textures.push_back(texture);
-	}	
+	}
+	LoadTexture(gameOverTexture, Constants::gameOverTexture);
 }
 
 void Game::CreateBulletBuffers() {
@@ -675,4 +688,30 @@ void Game::CreateHeartBuffers() {
 	glBufferData(GL_ARRAY_BUFFER, sizeof(Colors), Colors, GL_STATIC_DRAW);
 	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
 	glEnableVertexAttribArray(1);
+}
+
+void Game::CreateGameOverBuffers() {
+	GLfloat Vertices[] = {
+		0.0f, 0.0f, 0.0f, 1.0f,								0.0f, 0.0f, 0.0f,		0.0f, 0.0f,
+		Constants::maxX, 0.0f, 0.0f, 1.0f,					0.0f, 0.0f, 0.0f,		1.0f, 0.0f,
+		Constants::maxX, Constants::maxY, 0.0f, 1.0f,		0.0f, 0.0f, 0.0f,		1.0f, 1.0f,
+		0.0f, Constants::maxY, 0.0f, 1.0f,					0.0f, 0.0f, 0.0f,		0.0f, 1.0f,
+	};
+
+	glGenVertexArrays(1, &gameOverVao);
+	glGenBuffers(1, &gameOverVbo);
+
+	glBindVertexArray(gameOverVao);
+
+	glBindBuffer(GL_ARRAY_BUFFER, gameOverVbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(Vertices), Vertices, GL_STATIC_DRAW);
+
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), (GLvoid*)0);
+
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), (GLvoid*)(4 * sizeof(GLfloat)));
+
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), (GLvoid*)(7 * sizeof(GLfloat)));
 }

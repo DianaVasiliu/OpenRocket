@@ -463,16 +463,10 @@ void Game::UpdateAsteroids() {
 	});
 
 	asteroids.erase(end, asteroids.end());
-	int count = 0;
-	for (auto& asteroid : asteroids) {
-		string previousState = asteroid->getCurrentZone();
-		asteroid->updateState();
-		string newState = asteroid->getCurrentZone();
-		if (previousState != newState) {
-			count++;
-		}
+	
+	while (asteroids.size() < Constants::nrOfAsteroidsPerFrame) {
+		Game::GenerateAsteroids(1);
 	}
-	Game::GenerateAsteroids(count);
 }
 
 float Game::generateOffset(float leftOffset, float rightOffset, const string offsetType) {

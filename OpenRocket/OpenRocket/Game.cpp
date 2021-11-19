@@ -1,12 +1,14 @@
 #include "Game.h"
-#include "loadShaders.h"
 #include "helpers.h"
 #include "Constants.h"
 #include "Asteroid.h"
-#include "SOIL/SOIL.h"
 #include "Rocket.h"
+
 #include <ctime>
 #include <vector>
+
+#include "loadShaders.h"
+#include "SOIL/SOIL.h"
 
 #include <GL/glew.h>
 #include <GL/freeglut.h>
@@ -16,6 +18,8 @@ vector<GLuint> Game::textures;
 
 void Game::move(void)
 {
+	// when the left mouse is clicked, the game must start
+	// so the asteroids and the bullets must start moving
 	for (auto& asteroid : asteroids) {
 		float translatedDistance = asteroid->getTranslatedDistance();
 		asteroid->setTranslatedDistance(translatedDistance + Constants::asteroidMovingUnit);
@@ -31,6 +35,8 @@ void Game::move(void)
 
 void Game::mouseHandler(int button, int state, int x, int y) {
 	switch (button) {
+	// when the left mouse button is clicked, the Game::move() function
+	// is called through a callback function
 	case GLUT_LEFT_BUTTON:
 		glutIdleFunc(moveCallback);
 		break;
@@ -53,29 +59,28 @@ Game::Game(int initial_pos_x, int initial_pos_y) :
 	score(0),
 	width(Constants::maxX),
 	height(Constants::maxY),
-	maxX(Constants::maxX),
-	maxY(Constants::maxY),
-	rocketMatrix(glm::mat4(1.0f)),
-	rocketScaleMatrix(glm::mat4(1.0f)),
-	rocketRotateMatrix(glm::mat4(1.0f)),
-	rocketTranslateMatrix(glm::mat4(1.0f))
+	initPosX(initial_pos_x),
+	initPosY(initial_pos_y)
 {
-	setInitPosX(initial_pos_x);
-	setInitPosY(initial_pos_y);
 	maxX = width / 2;
 	maxY = height / 2;
 
 	InitializeLibraries();
-	CreateHeartBuffers();
+	
+	// creating the buffers for each type of element to be rendered
 	CreateBackgroundBuffers();
 	CreateRocketBuffers();
 	CreateAsteroidBuffers();
 	CreateBulletBuffers();
+	CreateHeartBuffers();
 	CreateGameOverBuffers();
+
+	// generating the first asteroids
 	GenerateAsteroids(Constants::nrOfAsteroidsPerFrame);
 }
 
 void Game::InitializeLibraries() {
+	// initializing: freeglut, glew, glfw
 	glutInitWindowPosition(getInitPosX(), getInitPosY());
 	glutInitWindowSize(getWidth(), getHeight());
 	glutCreateWindow(Constants::title);
@@ -97,6 +102,7 @@ void Game::CreateShaders() {
 
 void Game::DestroyShaders(void) {
 	glDeleteProgram(ProgramId);
+	glDeleteProgram(TextureProgramId);
 }
 
 void Game::Cleanup(void) {
@@ -105,6 +111,7 @@ void Game::Cleanup(void) {
 }
 
 void Game::DestroyVBO(void) {
+	glDisableVertexAttribArray(2);
 	glDisableVertexAttribArray(1);
 	glDisableVertexAttribArray(0);
 
@@ -128,11 +135,6 @@ void Game::DestroyVBO(void) {
 
 void Game::InitializeGame() {
 	CreateShaders();
-
-	resizeMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(1.f / maxX, 1.f / maxY, 1.0));
-	matrTransl = glm::translate(glm::mat4(1.0f), glm::vec3(-maxX, -maxY, 0.0));
-	myMatrix = resizeMatrix * matrTransl;
-
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	Game::loadTextures();
 }
@@ -160,11 +162,11 @@ void Game::FireAnimation() {
 	}
 
 	float orangeTail = 50.0f + fireTail;
-	float leftSideX = 775 + 0.f - fireSides;
-	float leftSideY = 85.f - fireSides;
-	float rightSideX = 775 + 50.f + fireSides;
-	float rightSideY = 85.f - fireSides;
-	float yellowTail = 70.f + fireTail;
+	float leftSideX = 775.0f - fireSides;
+	float leftSideY = 85.0f - fireSides;
+	float rightSideX = 825.0f + fireSides;
+	float rightSideY = 85.0f - fireSides;
+	float yellowTail = 70.0f + fireTail;
 	glNamedBufferSubData(rocketVbo, 15 * 7 * sizeof(GLfloat), sizeof(GLfloat), &rightSideX);
 	glNamedBufferSubData(rocketVbo, (15 * 7 + 1) * sizeof(GLfloat), sizeof(GLfloat), &rightSideY);
 	glNamedBufferSubData(rocketVbo, (16 * 7 + 1) * sizeof(GLfloat), sizeof(GLfloat), &orangeTail);
@@ -180,6 +182,8 @@ void Game::RenderFunction(void) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	if (rocket->getIsDead()) {
+		// when the rocket dies, the texture programid must be used
+		// in order to render the GAME OVER photo
 		glUseProgram(TextureProgramId);
 		myMatrixLocation = glGetUniformLocation(TextureProgramId, "myMatrix");
 
@@ -195,13 +199,17 @@ void Game::RenderFunction(void) {
 		return;
 	}
 
-	if (rotationAngle > 360.f) {
+	// reset the rotation angle of the background if is goes above an entire circle
+	if (rotationAngle > 360.0f) {
 		rotationAngle = 0.0f;
 	}
+
 	glUseProgram(ProgramId);
 
 	rotationAngle += rotationSpeed;
 
+	// we are scaling the [-1, 1]x[-1, 1] screen to a [0, 1600]x[0, 900] screen
+	// and we are rotating the background with a rotation angle 
 	backgroundScaleMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f / maxX, 1.0f / maxY, 1.0f));
 	backgroundTranslateMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(-maxX, -maxY, 0.0f));
 	backgroundRotateMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(rotationAngle), glm::vec3(0.0f, 0.0f, -1.0f));
@@ -209,6 +217,8 @@ void Game::RenderFunction(void) {
 
 	myMatrixLocation = glGetUniformLocation(ProgramId, "myMatrix");
 	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &backgroundMatrix[0][0]);
+
+	// drawing the stars
 	glPointSize(2.0);
 	glBindVertexArray(backgroundVao);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, backgroundEbo);
@@ -216,18 +226,19 @@ void Game::RenderFunction(void) {
 
 	FireAnimation();
 
+	// the position of the rocket is changed at keyboard input
+	// so the rocket must be translated
 	float posX = rocket->getPositionX();
 	float posY = rocket->getPositionY();
-	glm::mat4 scaleMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f / maxX, 1.0f / maxY, 1.0f));
-	glm::mat4 translateMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(-maxX, -maxY, 0.0f));
 	glm::mat4 rocketTranslateMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(posX, posY, 0.0f));
 
-	glm::mat4 matrix = scaleMatrix * translateMatrix * rocketTranslateMatrix;
+	glm::mat4 matrix = backgroundScaleMatrix * backgroundTranslateMatrix * rocketTranslateMatrix;
 	rocket->setRocketMatrix(matrix);
 
 	myMatrixLocation = glGetUniformLocation(ProgramId, "myMatrix");
 	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &matrix[0][0]);
 
+	// drawing the rocket
 	glBindVertexArray(rocketVao);
 	glDrawArrays(GL_TRIANGLES, 0, 3);
 	glDrawArrays(GL_TRIANGLES, 3, 3);
@@ -236,9 +247,12 @@ void Game::RenderFunction(void) {
 	glDrawArrays(GL_POLYGON, 13, 5);
 	glDrawArrays(GL_POLYGON, 18, 5);	
 
+	// resetting the background matrix so the other elements don't rotate
 	backgroundMatrix = backgroundScaleMatrix * backgroundTranslateMatrix;
 
 	Game::UpdateAsteroids();
+	
+	// using the texture programid so the asteroids have texture
 	glUseProgram(TextureProgramId);
 	myMatrixLocation = glGetUniformLocation(TextureProgramId, "myMatrix");
 	
@@ -246,15 +260,22 @@ void Game::RenderFunction(void) {
 	
 	for (auto& asteroid : asteroids) {
 		glBindTexture(GL_TEXTURE_2D, Game::textures[asteroid->getTextureIndex()]);
+		
 		glm::mat4 asteroidMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(asteroid->getRadius(), asteroid->getRadius(), 1.0));
-		glm::mat4 animateMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0, - asteroid->getTranslatedDistance(), 0.0)); // controleaza translatia de-a lungul lui Oy
-		asteroidMatrix = backgroundMatrix *  animateMatrix * glm::translate(glm::mat4(1.0f), glm::vec3(asteroid->getX(), asteroid->getY(), 0.0)) * asteroidMatrix;
+		// moving the asteroids on the Oy axis
+		glm::mat4 animateMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0, - asteroid->getTranslatedDistance(), 0.0));
+		glm::mat4 asteroidTranslateMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(asteroid->getX(), asteroid->getY(), 0.0));
+		asteroidMatrix = backgroundMatrix *  animateMatrix * asteroidTranslateMatrix * asteroidMatrix;
 		asteroid->setAsteroidMatrix(asteroidMatrix);
+
 		glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &asteroidMatrix[0][0]);
+		
+		// drawing the asteroid
 		glBindVertexArray(asteroidVao);
 		glDrawArrays(GL_POLYGON, 0, Constants::nrOfVerticesPerCircle);
 	}	
 
+	// reseting the programid so it doesn't use textures anymore
 	glDisable(GL_TEXTURE_2D);
 	glUseProgram(ProgramId);
 	myMatrixLocation = glGetUniformLocation(ProgramId, "myMatrix");
@@ -263,16 +284,22 @@ void Game::RenderFunction(void) {
 
 	for (auto& bullet : bullets) {
 		glm::mat4 bulletMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(bullet->getRadius(), bullet->getRadius(), 1.0f));
+		// moving the bullets on the Oy axis
 		glm::mat4 animateMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0, bullet->getY(), 0.0));
 		bulletMatrix = backgroundMatrix * animateMatrix * glm::translate(glm::mat4(1.0f), glm::vec3(bullet->getX(), bullet->getY(), 0.0)) * bulletMatrix;
-
 		bullet->bulletMatrix = bulletMatrix;
+
 		glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &bulletMatrix[0][0]);
+		
+		// drawing the bullet
 		glBindVertexArray(bulletVao);
 		glDrawArrays(GL_POLYGON, 0, Constants::nrOfVerticesPerCircle);
 	}	
 
+	// checking rocket-asteroid collison
 	rocket->RocketAsteroidsCollision(asteroids);
+
+	// checking bullet-asteroid collision
 	BulletAsteroidCollision();
 	
 	glm::mat4 heartMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(4.7f, 4.7f, 1.0f));
@@ -280,10 +307,13 @@ void Game::RenderFunction(void) {
 
 	glm::mat4 heartTranslateMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(10.0f, 0.0f, 0.0f));
 	for (int i = 0; i < rocket->getRemainingLives(); i++) {
+		// translating the hearts starting with the second one
 		if (i != 0) {
 			heartMatrix = heartMatrix * heartTranslateMatrix;
 		}
 		glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &heartMatrix[0][0]);
+
+		// drawing the heart
 		glBindVertexArray(heartVao);
 		glDrawArrays(GL_POLYGON, 0, 14);
 	}
@@ -304,12 +334,12 @@ void Game::CreateBackgroundBuffers() {
 	while (i < nrOfStars) {
 		Vertices[4 * i] = float(rand() % (4 * getWidth()) + 1) - 2 * getWidth();
 		Vertices[4 * i + 1] = float(rand() % (4 * getHeight()) + 1) - 2 * getHeight();
-		Vertices[4 * i + 2] = 0.f;
-		Vertices[4 * i + 3] = 1.f;
-		Colors[4 * i] = 1.f;
-		Colors[4 * i + 1] = 1.f;
-		Colors[4 * i + 2] = 1.f;
-		Colors[4 * i + 3] = 1.f;
+		Vertices[4 * i + 2] = 0.0f;
+		Vertices[4 * i + 3] = 1.0f;
+		Colors[4 * i] = 1.0f;
+		Colors[4 * i + 1] = 1.0f;
+		Colors[4 * i + 2] = 1.0f;
+		Colors[4 * i + 3] = 1.0f;
 		i++;
 	}
 
@@ -335,39 +365,39 @@ void Game::CreateRocketBuffers() {
 	Rocket* rocket = Rocket::getInstance();
 	GLfloat Vertices[] = {
 		// Top wings triangle
-		rocket->topWingsTriangle.left[0], rocket->topWingsTriangle.left[1], 0.f, 1.f,           1.0f, 0.0f, 0.0f,
-		rocket->topWingsTriangle.right[0], rocket->topWingsTriangle.right[1], 0.f, 1.f,         1.0f, 0.0f, 0.0f,
-		rocket->topWingsTriangle.top[0], rocket->topWingsTriangle.top[1], 0.f, 1.f,             1.0f, 0.0f, 0.0f,
+		rocket->topWingsTriangle.left[0], rocket->topWingsTriangle.left[1], 0.0f, 1.0f,           1.0f, 0.0f, 0.0f,
+		rocket->topWingsTriangle.right[0], rocket->topWingsTriangle.right[1], 0.0f, 1.0f,         1.0f, 0.0f, 0.0f,
+		rocket->topWingsTriangle.top[0], rocket->topWingsTriangle.top[1], 0.0f, 1.0f,             1.0f, 0.0f, 0.0f,
 
 		// Bottom wings triangle
-		rocket->bottomWingsTriangle.left[0], rocket->bottomWingsTriangle.left[1], 0.f, 1.f,       1.0f, 0.0f, 0.0f,
-		rocket->bottomWingsTriangle.right[0], rocket->bottomWingsTriangle.right[1], 0.f, 1.f,     1.0f, 0.0f, 0.0f,
-		rocket->bottomWingsTriangle.top[0], rocket->bottomWingsTriangle.top[1], 0.f, 1.f,         1.0f, 0.0f, 0.0f,
+		rocket->bottomWingsTriangle.left[0], rocket->bottomWingsTriangle.left[1], 0.0f, 1.0f,       1.0f, 0.0f, 0.0f,
+		rocket->bottomWingsTriangle.right[0], rocket->bottomWingsTriangle.right[1], 0.0f, 1.0f,     1.0f, 0.0f, 0.0f,
+		rocket->bottomWingsTriangle.top[0], rocket->bottomWingsTriangle.top[1], 0.0f, 1.0f,         1.0f, 0.0f, 0.0f,
 
 		// Body rectangle
-		rocket->body.bottomLeft[0], rocket->body.bottomLeft[1], 0.f, 1.f,                         0.8f, 0.5f, 0.2f,
-		rocket->body.bottomRight[0], rocket->body.bottomRight[1], 0.f, 1.f,                       0.8f, 0.5f, 0.2f,
-		rocket->body.topRight[0], rocket->body.topRight[1], 0.f, 1.f,                             0.8f, 0.5f, 0.2f,
-		rocket->body.topLeft[0], rocket->body.topLeft[1], 0.f, 1.f,                               0.8f, 0.5f, 0.2f,
+		rocket->body.bottomLeft[0], rocket->body.bottomLeft[1], 0.0f, 1.0f,                         0.8f, 0.5f, 0.2f,
+		rocket->body.bottomRight[0], rocket->body.bottomRight[1], 0.0f, 1.0f,                       0.8f, 0.5f, 0.2f,
+		rocket->body.topRight[0], rocket->body.topRight[1], 0.0f, 1.0f,                             0.8f, 0.5f, 0.2f,
+		rocket->body.topLeft[0], rocket->body.topLeft[1], 0.0f, 1.0f,                               0.8f, 0.5f, 0.2f,
 
 		// Top triangle
-		rocket->frontTriangle.left[0], rocket->frontTriangle.left[1], 0.f, 1.f,                 1.0f, 1.0f, 1.0f,
-		rocket->frontTriangle.right[0], rocket->frontTriangle.right[1], 0.f, 1.f,               1.0f, 1.0f, 1.0f,
-		rocket->frontTriangle.top[0], rocket->frontTriangle.top[1], 0.f, 1.f,                   1.0f, 1.0f, 1.0f,
+		rocket->frontTriangle.left[0], rocket->frontTriangle.left[1], 0.0f, 1.0f,                 1.0f, 1.0f, 1.0f,
+		rocket->frontTriangle.right[0], rocket->frontTriangle.right[1], 0.0f, 1.0f,               1.0f, 1.0f, 1.0f,
+		rocket->frontTriangle.top[0], rocket->frontTriangle.top[1], 0.0f, 1.0f,                   1.0f, 1.0f, 1.0f,
 	
 		// Orange fire
-		775 + 15.f, 100.f, 0.f, 1.f,                         1.f, 0.25f, 0.0f,
-		775 + 35.f, 100.f, 0.f, 1.f,                         1.f, 0.25f, 0.0f,
-		775 + 50.f, 85.f, 0.f, 1.f,                          1.f, 0.25f, 0.0f,
-		775 + 25.f, 50.f, 0.f, 1.f,                          1.f, 0.25f, 0.0f,
-		775 + 0.f, 85.f, 0.f, 1.f,                           1.f, 0.25f, 0.0f,
+		790.0f, 100.0f, 0.0f, 1.0f,                         1.0f, 0.25f, 0.0f,
+		810.0f, 100.0f, 0.0f, 1.0f,                         1.0f, 0.25f, 0.0f,
+		825.0f, 85.0f, 0.0f, 1.0f,                          1.0f, 0.25f, 0.0f,
+		800.0f, 50.0f, 0.0f, 1.0f,                          1.0f, 0.25f, 0.0f,
+		775.0f, 85.0f, 0.0f, 1.0f,                          1.0f, 0.25f, 0.0f,
 
 		// Yellow fire
-		775 + 15.f, 100.f, 0.f, 1.f,                         1.0f, 0.8f, 0.0f,
-		775 + 35.f, 100.f, 0.f, 1.f,                         1.0f, 0.8f, 0.0f,
-		775 + 40.f, 90.f, 0.f, 1.f,                          1.0f, 0.8f, 0.0f,
-		775 + 25.f, 70.f, 0.f, 1.f,                          1.0f, 0.8f, 0.0f,
-		775 + 10.f, 90.f, 0.f, 1.f,                          1.0f, 0.8f, 0.0f,
+		790.0f, 100.0f, 0.0f, 1.0f,                         1.0f, 0.8f, 0.0f,
+		810.0f, 100.0f, 0.0f, 1.0f,                         1.0f, 0.8f, 0.0f,
+		815.0f, 90.0f, 0.0f, 1.0f,                         1.0f, 0.8f, 0.0f,
+		800.0f, 70.0f, 0.0f, 1.0f,                          1.0f, 0.8f, 0.0f,
+		785.0f, 90.0f, 0.0f, 1.0f,                          1.0f, 0.8f, 0.0f,
 	};
 
 	glGenVertexArrays(1, &rocketVao);
@@ -386,17 +416,17 @@ void Game::CreateRocketBuffers() {
 
 
 	GLfloat Square[] = {
-		400.f, 000.f, 0.f, 1.f, // st jos
-		800.f, 000.f, 0.f, 1.f, // dr jos
-		800.f, 200.f, 0.f, 1.f, // dr sus,
-		400.f, 200.f, 0.f, 1.f // st sus
+		400.0f, 000.0f, 0.0f, 1.0f, // down left
+		800.0f, 000.0f, 0.0f, 1.0f, // down right
+		800.0f, 200.0f, 0.0f, 1.0f, // up right
+		400.0f, 200.0f, 0.0f, 1.0f // up left
 	};
 
 	GLfloat SquareColors[] = {
-		1.f, 0.f, 1.f, 0.f,
-		1.f, 0.f, 1.f, 0.f,
-		1.f, 0.f, 1.f, 0.f,
-		1.f, 0.f, 1.f, 0.f,
+		1.0f, 0.0f, 1.0f, 0.0f,
+		1.0f, 0.0f, 1.0f, 0.0f,
+		1.0f, 0.0f, 1.0f, 0.0f,
+		1.0f, 0.0f, 1.0f, 0.0f,
 	};
 
 	glGenBuffers(1, &squareVbo);
@@ -420,6 +450,7 @@ void Game::CreateAsteroidBuffers() {
 
 	GLfloat Vertices[1000];
 	for (int k = 0; k < Constants::nrOfVerticesPerCircle; k++) {
+		// generating points on the circle
 		float theta = Constants::TWO_PI * k / Constants::nrOfVerticesPerCircle;
 		float x = cos(theta);
 		float y = sin(theta);
@@ -456,6 +487,7 @@ void Game::CreateAsteroidBuffers() {
 }
 
 void Game::UpdateAsteroids() {
+	// selecting the asteroids that are below viewport
 	auto end = std::remove_if(asteroids.begin(),
 		asteroids.end(),
 		[](Asteroid* const& i) {
@@ -463,7 +495,8 @@ void Game::UpdateAsteroids() {
 	});
 
 	asteroids.erase(end, asteroids.end());
-	
+
+	// keeping the number of asteroids to a minimum
 	while (asteroids.size() < Constants::nrOfAsteroidsPerFrame) {
 		Game::GenerateAsteroids(1);
 	}
@@ -529,9 +562,12 @@ void Game::loadTextures() {
 void Game::CreateBulletBuffers() {
 	GLfloat Vertices[1000];
 	GLfloat Colors[1000];
-	Bullet::bulletCenter = { 0.f, 0.0f, 0.f, 1.f };
-	Bullet::bulletPoint = { Constants::bulletRadius, 0.0f, 0.f, 1.f };
+
+	Bullet::bulletCenter = { 0.0f, 0.0f, 0.0f, 1.0f };
+	Bullet::bulletPoint = { Constants::bulletRadius, 0.0f, 0.0f, 1.0f };
+
 	for (int k = 0; k < Constants::nrOfVerticesPerCircle; k++) {
+		// generating points on the circle
 		float theta = Constants::TWO_PI * (float)k / (float)Constants::nrOfVerticesPerCircle;
 		float x = Constants::bulletRadius * cos(theta);
 		float y = Constants::bulletRadius * sin(theta);
@@ -568,6 +604,8 @@ void Game::GenerateBullet() {
 	Rocket* rocket = Rocket::getInstance();
 	double now = glfwGetTime();
 
+	// stop generating bullets if the weapon is spammed
+	// generate a new bullet only if a number of seconds have passed
 	if (bullets.size() < Constants::nrOfBulletsPerFrame) {
 		if (now - lastBulletTime > Constants::bulletSpawnCooldown) {
 			lastBulletTime = glfwGetTime();
@@ -583,6 +621,7 @@ void Game::GenerateBullet() {
 }
 
 void Game::UpdateBullets() {
+	// remove the bullets if they went above the window
 	auto end = std::remove_if(bullets.begin(),
 		bullets.end(),
 		[](Bullet* const& i) {
@@ -597,6 +636,8 @@ double distance(glm::vec4 p1, glm::vec4 p2) {
 }
 
 void Game::BulletAsteroidCollision() {
+	// calculating the distance between each bullet and each asteroid
+	// remove both at collision
 
 	for (int i = 0; i < int(bullets.size()); i++) {
 		for (int j = 0; j < int(asteroids.size()); j++) {

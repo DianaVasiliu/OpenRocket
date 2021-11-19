@@ -239,6 +239,5 @@ void Rocket::RocketAsteroidsCollision(vector<Asteroid*> asteroids)
 				std::cout << "Your score is: " << game->getScore() / 2 << "\n";
 			}
 		}
-
 	}
 }

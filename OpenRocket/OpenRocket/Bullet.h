@@ -10,6 +10,7 @@ private:
 	float x;
 	float y;
 	bool toBeDeleted = false;
+
 public:
 	Bullet(float, float, float);
 	~Bullet() {}
@@ -17,10 +18,8 @@ public:
 	float getRadius() const;
 	float getX() const;
 	float getY() const;
-	float getTranslatedDistance() const;
-  
+	float getTranslatedDistance() const;  
 	bool getToBeDeleted() { return toBeDeleted; }
-	void setToBeDeleted(bool t) { toBeDeleted = t; }
 
 	static glm::vec4 bulletCenter;
 	static glm::vec4 bulletPoint;
@@ -29,6 +28,7 @@ public:
 	void setX(float);
 	void setY(float);
 	void setTranslatedDistance(float);
+	void setToBeDeleted(bool t) { toBeDeleted = t; }
 
 	bool aboveViewport();
 };

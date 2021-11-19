@@ -1,6 +1,5 @@
 #include "helpers.h"
 #include "Rocket.h"
-#include <iostream>
 
 void makeCheckImage(void)
 {

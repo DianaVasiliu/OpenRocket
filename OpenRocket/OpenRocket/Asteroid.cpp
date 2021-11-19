@@ -14,6 +14,7 @@ Asteroid::Asteroid(float radius = 40.0f, int nrOfVertices = 16, glm::vec4 coordi
 	currentZone(Constants::SAFE),
 	asteroidMatrix(glm::mat4(1.0f))
 {
+	// setting a random texture for the asteroid
 	textureIndex = rand() % Constants::nrOfTextures;
 };
 
@@ -22,7 +23,7 @@ bool Asteroid::isInViewport() {
 }
 
 bool Asteroid::belowViewport() {
-	return this->coordinates.y - this->translatedDistance < - this->radius;
+	return this->coordinates.y - this->translatedDistance < -this->radius;
 }
 
 bool Asteroid::inLowerHalf() {
@@ -63,14 +64,26 @@ int Asteroid::getTextureIndex() const {
 	return this->textureIndex;
 }
 
-void Asteroid::setAsteroidMatrix(glm::mat4 matrix) { asteroidMatrix = matrix; }
+void Asteroid::setAsteroidMatrix(glm::mat4 matrix) { 
+	asteroidMatrix = matrix; 
+}
 
-glm::mat4 Asteroid::getAsteroidMatrix() const { return asteroidMatrix; }
+glm::mat4 Asteroid::getAsteroidMatrix() const { 
+	return asteroidMatrix; 
+}
 
-float Asteroid::getTranslatedDistance() const { return this->translatedDistance; }
+float Asteroid::getTranslatedDistance() const { 
+	return this->translatedDistance; 
+}
 
-void Asteroid::setTranslatedDistance(float distance) { this->translatedDistance = distance; }
+void Asteroid::setTranslatedDistance(float distance) { 
+	this->translatedDistance = distance; 
+}
 
-float Asteroid::getRadius() const { return this->radius; }
+float Asteroid::getRadius() const { 
+	return this->radius; 
+}
 
-float Asteroid::getY() const { return this->coordinates.y; }
+float Asteroid::getY() const { 
+	return this->coordinates.y; 
+}

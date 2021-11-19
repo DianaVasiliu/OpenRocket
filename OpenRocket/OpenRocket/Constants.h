@@ -9,8 +9,8 @@ public:
     static const int height; 
     static const int maxX;
     static const int maxY;
-	static const char* title;
-	static const float PI;
+    static const char* title;
+    static const float PI;
     static const int nrOfStars;
     static const int nrOfAsteroids;
     static const int nrOfAsteroidsPerFrame;

@@ -1,6 +1,5 @@
 #include "Bullet.h"
 #include "Constants.h"
-#include <iostream>
 
 Bullet::Bullet(float radius, float posX, float posY) :
 	radius(radius),
@@ -8,7 +7,6 @@ Bullet::Bullet(float radius, float posX, float posY) :
 	y(posY),
 	translatedDistance(0)
 {
-
 }
 
 bool Bullet::aboveViewport() {

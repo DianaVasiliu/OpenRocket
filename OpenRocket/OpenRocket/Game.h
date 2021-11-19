@@ -20,7 +20,6 @@ private:
 	static Game* instance;
 	static vector<GLuint> textures;
 
-	GLfloat RocketVertices[1000];
 	glm::mat4 backgroundMatrix = glm::mat4(1.0f);
 	glm::mat4 backgroundScaleMatrix = glm::mat4(1.0f);
 	glm::mat4 backgroundRotateMatrix = glm::mat4(1.0f);
@@ -56,11 +55,6 @@ private:
 	GLuint gameOverVao;
 	GLuint gameOverVbo;
 
-	glm::mat4 rocketMatrix = glm::mat4(1.0f);
-	glm::mat4 rocketScaleMatrix = glm::mat4(1.0f);
-	glm::mat4 rocketRotateMatrix = glm::mat4(1.0f);
-	glm::mat4 rocketTranslateMatrix = glm::mat4(1.0f);
-
 	float fireTailVelocity = 0.0075f;
 	float fireSidesVelocity = fireTailVelocity / 4;
 	float resetTailEvery = 10.0f;
@@ -77,7 +71,6 @@ private:
 
 	int width;
 	int height;
-	int codCol;
 
 	GLuint ProgramId;
 	GLuint TextureProgramId;
@@ -87,23 +80,12 @@ private:
 	int nrOfStars;
 	int score;
 
-	int colorCode;
 	int initPosX;
 	int initPosY;
 	int maxX;
 	int maxY;
 
 	GLuint myMatrixLocation;
-	GLuint matrScaleLocation;
-	GLuint matrTranslLocation;
-	GLuint matrRotlLocation;
-	GLuint codColLocation;
-	glm::mat4 myMatrix;
-	glm::mat4 resizeMatrix;
-	glm::mat4 matrTransl;
-	glm::mat4 matrScale;
-	glm::mat4 matrRot;
-	glm::mat4 mTest;
 
 public:
 	Game(int, int);

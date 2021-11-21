@@ -19,16 +19,15 @@ public:
 	float getX() const;
 	float getY() const;
 	float getTranslatedDistance() const;  
-	bool getToBeDeleted() { return toBeDeleted; }
-
-	static glm::vec4 bulletCenter;
-	static glm::vec4 bulletPoint;
-	glm::mat4 bulletMatrix;
+	bool getToBeDeleted() const;
 
 	void setX(float);
 	void setY(float);
 	void setTranslatedDistance(float);
-	void setToBeDeleted(bool t) { toBeDeleted = t; }
+	void setToBeDeleted(bool);
 
+	static glm::vec4 bulletCenter;
+	static glm::vec4 bulletPoint;
+	glm::mat4 bulletMatrix;
 	bool aboveViewport();
 };

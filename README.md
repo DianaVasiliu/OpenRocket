@@ -2,10 +2,13 @@
 
 ## Basic idea
 
--   the player will control a rocket using the keyboard
--   there will be asteroids, that must be avoided by the player
--   the asteroids will move along one axis
--   (extra) the rocket will have an attack and can destroy the asteroids
+A rocket on a mission in space must escape a wave of dangerous asteroids. To finish the mission and get home safe, the rocket can either avoid asteroids or destroy them with its weapon. If the rocket collides with an asteroid, it loses one life, but if it remains without lives, it explodes and the game ends.
+
+## Gameplay
+
+<p align="center">
+  <img src="demo.gif" alt="Demo" width="80%"/>
+</p>
 
 ## Libraries
 

@@ -43,3 +43,11 @@ void Bullet::setY(float y) {
 void Bullet::setTranslatedDistance(float distance) {
 	translatedDistance = distance;
 }
+
+bool Bullet::getToBeDeleted() const { 
+	return toBeDeleted; 
+}
+
+void Bullet::setToBeDeleted(bool t) { 
+	toBeDeleted = t; 
+}

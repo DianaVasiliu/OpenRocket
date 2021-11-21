@@ -87,3 +87,11 @@ float Asteroid::getRadius() const {
 float Asteroid::getY() const { 
 	return this->coordinates.y; 
 }
+
+void Asteroid::setToBeDeleted(bool t) { 
+	toBeDeleted = t; 
+}
+
+bool Asteroid::getToBeDeleted() const { 
+	return toBeDeleted; 
+}

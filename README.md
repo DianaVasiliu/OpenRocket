@@ -6,7 +6,9 @@ A rocket on a mission in space must escape a wave of dangerous asteroids. To fin
 
 ## Gameplay
 
-<img src="demo.gif" alt="Demo" style="display:block; margin:0 auto; width:80%"/>
+<p align="center">
+  <img src="demo.gif" alt="Demo" width="80%"/>
+</p>
 
 ## Libraries
 

@@ -36,7 +36,7 @@ public:
 	bool inLowerHalf();
 	bool belowViewport();  
 
-	bool getToBeDeleted() const { return toBeDeleted; }
+	bool getToBeDeleted() const;
 	float getX() const;
 	float getY() const;
 	float getRadius() const;
@@ -49,7 +49,7 @@ public:
 	void setX(float);
 	void setY(float);
 	void setTranslatedDistance(float);
-	void setToBeDeleted(bool t) { toBeDeleted = t; }
+	void setToBeDeleted(bool);
 	void setAsteroidMatrix(glm::mat4);
 	void setCurrentZone(string);
 };

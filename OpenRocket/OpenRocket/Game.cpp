@@ -727,10 +727,10 @@ void Game::CreateHeartBuffers() {
 
 void Game::CreateGameOverBuffers() {
 	GLfloat Vertices[] = {
-		0.0f, 0.0f, 0.0f, 1.0f,								0.0f, 0.0f, 0.0f,		0.0f, 0.0f,
-		Constants::maxX, 0.0f, 0.0f, 1.0f,					0.0f, 0.0f, 0.0f,		1.0f, 0.0f,
-		Constants::maxX, Constants::maxY, 0.0f, 1.0f,		0.0f, 0.0f, 0.0f,		1.0f, 1.0f,
-		0.0f, Constants::maxY, 0.0f, 1.0f,					0.0f, 0.0f, 0.0f,		0.0f, 1.0f,
+		0.0f, 0.0f, 0.0f, 1.0f,												0.0f, 0.0f, 0.0f,		0.0f, 0.0f,
+		(GLfloat)Constants::maxX, 0.0f, 0.0f, 1.0f,							0.0f, 0.0f, 0.0f,		1.0f, 0.0f,
+		(GLfloat)Constants::maxX,(GLfloat)Constants::maxY, 0.0f, 1.0f,		0.0f, 0.0f, 0.0f,		1.0f, 1.0f,
+		0.0f,(GLfloat)Constants::maxY, 0.0f, 1.0f,							0.0f, 0.0f, 0.0f,		0.0f, 1.0f,
 	};
 
 	glGenVertexArrays(1, &gameOverVao);
